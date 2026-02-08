@@ -39,6 +39,22 @@ pub enum Network {
     CeloMainnet,
     /// Celo Alfajores testnet (chain ID 44787).
     CeloAlfajores,
+    /// Gnosis Mainnet (chain ID 100).
+    GnosisMainnet,
+    /// Scroll Mainnet (chain ID 534352).
+    ScrollMainnet,
+    /// Scroll Sepolia testnet (chain ID 534351).
+    ScrollSepolia,
+    /// Taiko Mainnet — Alethia (chain ID 167000).
+    TaikoMainnet,
+    /// Monad Mainnet (chain ID 143).
+    MonadMainnet,
+    /// Monad Testnet (chain ID 10143).
+    MonadTestnet,
+    /// BNB Smart Chain Mainnet (chain ID 56).
+    BscMainnet,
+    /// BNB Smart Chain Testnet (chain ID 97).
+    BscTestnet,
 }
 
 /// Shared addresses for all mainnet deployments (CREATE2 deterministic).
@@ -58,7 +74,12 @@ impl Network {
             | Self::BaseMainnet
             | Self::PolygonMainnet
             | Self::ArbitrumMainnet
-            | Self::CeloMainnet => NetworkAddresses {
+            | Self::CeloMainnet
+            | Self::GnosisMainnet
+            | Self::ScrollMainnet
+            | Self::TaikoMainnet
+            | Self::MonadMainnet
+            | Self::BscMainnet => NetworkAddresses {
                 identity: MAINNET_IDENTITY,
                 reputation: MAINNET_REPUTATION,
             },
@@ -66,7 +87,10 @@ impl Network {
             | Self::BaseSepolia
             | Self::PolygonAmoy
             | Self::ArbitrumSepolia
-            | Self::CeloAlfajores => NetworkAddresses {
+            | Self::CeloAlfajores
+            | Self::ScrollSepolia
+            | Self::MonadTestnet
+            | Self::BscTestnet => NetworkAddresses {
                 identity: TESTNET_IDENTITY,
                 reputation: TESTNET_REPUTATION,
             },
@@ -87,6 +111,14 @@ impl Network {
             Self::ArbitrumSepolia => 421_614,
             Self::CeloMainnet => 42220,
             Self::CeloAlfajores => 44787,
+            Self::GnosisMainnet => 100,
+            Self::ScrollMainnet => 534_352,
+            Self::ScrollSepolia => 534_351,
+            Self::TaikoMainnet => 167_000,
+            Self::MonadMainnet => 143,
+            Self::MonadTestnet => 10143,
+            Self::BscMainnet => 56,
+            Self::BscTestnet => 97,
         }
     }
 
