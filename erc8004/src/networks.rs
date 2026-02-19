@@ -122,6 +122,36 @@ impl Network {
         }
     }
 
+    /// All known ERC-8004 network variants.
+    pub const ALL: &[Self] = &[
+        Self::EthereumMainnet,
+        Self::EthereumSepolia,
+        Self::BaseMainnet,
+        Self::BaseSepolia,
+        Self::PolygonMainnet,
+        Self::PolygonAmoy,
+        Self::ArbitrumMainnet,
+        Self::ArbitrumSepolia,
+        Self::CeloMainnet,
+        Self::CeloAlfajores,
+        Self::GnosisMainnet,
+        Self::ScrollMainnet,
+        Self::ScrollSepolia,
+        Self::TaikoMainnet,
+        Self::MonadMainnet,
+        Self::MonadTestnet,
+        Self::BscMainnet,
+        Self::BscTestnet,
+    ];
+
+    /// Look up a [`Network`] by its EIP-155 chain ID.
+    ///
+    /// Returns [`None`] if the chain ID is not a known ERC-8004 deployment.
+    #[must_use]
+    pub fn from_chain_id(chain_id: u64) -> Option<Self> {
+        Self::ALL.iter().find(|n| n.chain_id() == chain_id).copied()
+    }
+
     /// Returns the `eip155:{chainId}` namespace prefix for agent registry identifiers.
     #[must_use]
     pub fn agent_registry_prefix(self) -> String {

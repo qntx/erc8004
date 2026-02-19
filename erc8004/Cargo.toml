@@ -4,7 +4,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
-description = "ERC-8004 Trustless Agents Rust SDK."
+description.workspace = true
 keywords = ["ethereum", "erc8004", "ai", "agents", "trustless"]
 categories = ["cryptography::cryptocurrencies", "api-bindings"]
 
