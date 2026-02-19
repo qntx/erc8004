@@ -8,6 +8,7 @@ version = "0.2.3"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/qntx/erc8004"
+description = "ERC-8004 Trustless Agents Rust SDK."
 
 [workspace.dependencies]
 erc8004 = { path = "erc8004" }
