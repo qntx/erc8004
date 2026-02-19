@@ -19,7 +19,7 @@
 
 **Type-safe Rust SDK for the [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) Trustless Agents standard — on-chain identity, reputation, and validation registries for AI agents.**
 
-ERC-8004 enables **discovery, reputation, and validation** of AI agents across organizational boundaries without pre-existing trust. This SDK provides ergonomic, alloy-native bindings for all three registries, with 18 pre-configured network deployments (CREATE2 deterministic addresses) and full off-chain type support (registration files, service endpoints, feedback).
+ERC-8004 enables **discovery, reputation, and validation** of AI agents across organizational boundaries without pre-existing trust. This SDK provides ergonomic, alloy-native bindings for all three registries, with 30 pre-configured network deployments (CREATE2 deterministic addresses) and full off-chain type support (registration files, service endpoints, feedback).
 
 See [Security](SECURITY.md) before using in production.
 
@@ -95,7 +95,7 @@ let json = reg.to_json()?;
 | **[`Identity`](erc8004/src/identity.rs)** | Identity Registry (ERC-721) — register agents, manage URIs, wallets, metadata, EIP-712 signatures |
 | **[`Reputation`](erc8004/src/reputation.rs)** | Reputation Registry — submit / revoke feedback, read aggregated summaries, list clients |
 | **[`Validation`](erc8004/src/validation.rs)** | Validation Registry — request / respond to validation, query status and summaries |
-| **[`Network`](erc8004/src/networks.rs)** | 18 pre-configured deployments (10 mainnet + 8 testnet) with CREATE2 deterministic addresses |
+| **[`Network`](erc8004/src/networks.rs)** | 30 pre-configured deployments (16 mainnet + 14 testnet) with CREATE2 deterministic addresses |
 | **[`types`](erc8004/src/types.rs)** | Off-chain JSON types — `RegistrationFile`, `ServiceEndpoint`, `Feedback`, `ReputationSummary` |
 | **[`contracts`](erc8004/src/contracts.rs)** | Inline Solidity bindings (`sol!` macro) — alloy-recommended, preserves full type information |
 
@@ -115,6 +115,12 @@ Contracts are deployed via CREATE2, so all mainnets share the same addresses and
 | Taiko (Alethia) | mainnet | 167000 |
 | Monad | mainnet | 143 |
 | BNB Smart Chain | mainnet | 56 |
+| Abstract | mainnet | 2741 |
+| Avalanche C-Chain | mainnet | 43114 |
+| Linea | mainnet | 59144 |
+| Mantle | mainnet | 5000 |
+| MegaETH | mainnet | 4326 |
+| Optimism | mainnet | 10 |
 | Ethereum Sepolia | testnet | 11155111 |
 | Base Sepolia | testnet | 84532 |
 | Polygon Amoy | testnet | 80002 |
@@ -123,6 +129,12 @@ Contracts are deployed via CREATE2, so all mainnets share the same addresses and
 | Scroll Sepolia | testnet | 534351 |
 | Monad Testnet | testnet | 10143 |
 | BNB Smart Chain Testnet | testnet | 97 |
+| Abstract Testnet | testnet | 11124 |
+| Avalanche Fuji | testnet | 43113 |
+| Linea Sepolia | testnet | 59141 |
+| Mantle Sepolia | testnet | 5003 |
+| MegaETH Testnet | testnet | 6342 |
+| Optimism Sepolia | testnet | 11155420 |
 
 ## Design
 
