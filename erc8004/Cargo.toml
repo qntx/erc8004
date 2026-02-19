@@ -4,6 +4,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
+readme = "../README.md"
 description = "ERC-8004 Trustless Agents Rust SDK."
 keywords = ["ethereum", "erc8004", "ai", "agents", "trustless"]
 categories = ["cryptography::cryptocurrencies", "api-bindings"]
@@ -15,6 +16,7 @@ serde_json.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]
+alloy = { workspace = true, features = ["node-bindings"] }
 tokio.workspace = true
 
 [lints]

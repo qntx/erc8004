@@ -1,0 +1,72 @@
+name: Sync ERC-8004 Events
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      chain:
+        description: "Sync a specific chain ID (leave empty for all mainnets)"
+        required: false
+        type: string
+      include_testnets:
+        description: "Include testnet chains"
+        required: false
+        type: boolean
+        default: false
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_LOG: info
+  HF_REPO: qntx/erc8004-events
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Build
+        run: cargo build --release -p erc8004-events
+
+      - name: Install Git LFS
+        run: git lfs install
+
+      - name: Clone HuggingFace dataset
+        run: |
+          git clone "https://x-access-token:${{ secrets.HF_TOKEN }}@huggingface.co/datasets/${HF_REPO}" hf-data \
+            || { git init hf-data && git -C hf-data remote add origin "https://x-access-token:${{ secrets.HF_TOKEN }}@huggingface.co/datasets/${HF_REPO}"; }
+
+      - name: Sync events
+        run: |
+          ARGS="sync --data-dir hf-data"
+          [ -n "${{ inputs.chain }}" ] && ARGS="$ARGS --chain ${{ inputs.chain }}"
+          [ "${{ inputs.include_testnets }}" = "true" ] && ARGS="$ARGS --include-testnets"
+          ./target/release/erc8004-events $ARGS
+
+      - name: Push to HuggingFace
+        run: |
+          cd hf-data
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No new events — skipping push."
+          else
+            git commit -m "sync: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git push origin main
+          fi
