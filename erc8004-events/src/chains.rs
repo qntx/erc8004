@@ -46,7 +46,7 @@ pub const ALL: &[ChainConfig] = &[
     ChainConfig {
         network: Network::BaseMainnet,
         deployment_block: 41_663_783,
-        first_event_block: Some(42_354_482),
+        first_event_block: None,
         default_rpc: "https://mainnet.base.org",
         is_testnet: false,
     },
