@@ -55,6 +55,30 @@ pub enum Network {
     BscMainnet,
     /// BNB Smart Chain Testnet (chain ID 97).
     BscTestnet,
+    /// Abstract Mainnet (chain ID 2741).
+    AbstractMainnet,
+    /// Abstract Testnet (chain ID 11124).
+    AbstractTestnet,
+    /// Avalanche C-Chain Mainnet (chain ID 43114).
+    AvalancheMainnet,
+    /// Avalanche Fuji Testnet (chain ID 43113).
+    AvalancheTestnet,
+    /// Linea Mainnet (chain ID 59144).
+    LineaMainnet,
+    /// Linea Sepolia testnet (chain ID 59141).
+    LineaSepolia,
+    /// Mantle Mainnet (chain ID 5000).
+    MantleMainnet,
+    /// Mantle Sepolia testnet (chain ID 5003).
+    MantleSepolia,
+    /// `MegaETH` Mainnet (chain ID 4326).
+    MegaEthMainnet,
+    /// `MegaETH` Testnet (chain ID 6342).
+    MegaEthTestnet,
+    /// Optimism Mainnet (chain ID 10).
+    OptimismMainnet,
+    /// Optimism Sepolia testnet (chain ID 11155420).
+    OptimismSepolia,
 }
 
 /// Shared addresses for all mainnet deployments (CREATE2 deterministic).
@@ -79,7 +103,13 @@ impl Network {
             | Self::ScrollMainnet
             | Self::TaikoMainnet
             | Self::MonadMainnet
-            | Self::BscMainnet => NetworkAddresses {
+            | Self::BscMainnet
+            | Self::AbstractMainnet
+            | Self::AvalancheMainnet
+            | Self::LineaMainnet
+            | Self::MantleMainnet
+            | Self::MegaEthMainnet
+            | Self::OptimismMainnet => NetworkAddresses {
                 identity: MAINNET_IDENTITY,
                 reputation: MAINNET_REPUTATION,
             },
@@ -90,7 +120,13 @@ impl Network {
             | Self::CeloAlfajores
             | Self::ScrollSepolia
             | Self::MonadTestnet
-            | Self::BscTestnet => NetworkAddresses {
+            | Self::BscTestnet
+            | Self::AbstractTestnet
+            | Self::AvalancheTestnet
+            | Self::LineaSepolia
+            | Self::MantleSepolia
+            | Self::MegaEthTestnet
+            | Self::OptimismSepolia => NetworkAddresses {
                 identity: TESTNET_IDENTITY,
                 reputation: TESTNET_REPUTATION,
             },
@@ -119,6 +155,18 @@ impl Network {
             Self::MonadTestnet => 10143,
             Self::BscMainnet => 56,
             Self::BscTestnet => 97,
+            Self::AbstractMainnet => 2741,
+            Self::AbstractTestnet => 11124,
+            Self::AvalancheMainnet => 43114,
+            Self::AvalancheTestnet => 43113,
+            Self::LineaMainnet => 59144,
+            Self::LineaSepolia => 59141,
+            Self::MantleMainnet => 5000,
+            Self::MantleSepolia => 5003,
+            Self::MegaEthMainnet => 4326,
+            Self::MegaEthTestnet => 6342,
+            Self::OptimismMainnet => 10,
+            Self::OptimismSepolia => 11_155_420,
         }
     }
 
@@ -142,6 +190,18 @@ impl Network {
         Self::MonadTestnet,
         Self::BscMainnet,
         Self::BscTestnet,
+        Self::AbstractMainnet,
+        Self::AbstractTestnet,
+        Self::AvalancheMainnet,
+        Self::AvalancheTestnet,
+        Self::LineaMainnet,
+        Self::LineaSepolia,
+        Self::MantleMainnet,
+        Self::MantleSepolia,
+        Self::MegaEthMainnet,
+        Self::MegaEthTestnet,
+        Self::OptimismMainnet,
+        Self::OptimismSepolia,
     ];
 
     /// Look up a [`Network`] by its EIP-155 chain ID.

@@ -4,15 +4,15 @@ default-members = ["erc8004"]
 resolver = "3"
 
 [workspace.package]
-version = "0.2.3"
+version = "0.2.5"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/qntx/erc8004"
 description = "ERC-8004 Trustless Agents Rust SDK."
 
 [workspace.dependencies]
-erc8004 = { path = "erc8004" }
-erc8004-events = { path = "erc8004-events" }
+erc8004 = { version = "0.2", path = "erc8004" }
+erc8004-events = { version = "0.2", path = "erc8004-events" }
 
 alloy = { version = "1", features = ["full"] }
 anyhow = "1"

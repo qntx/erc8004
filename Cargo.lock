@@ -1941,7 +1941,7 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "erc8004"
-version = "0.2.3"
+version = "0.2.5"
 dependencies = [
  "alloy",
  "serde",
@@ -1952,7 +1952,7 @@ dependencies = [
 
 [[package]]
 name = "erc8004-events"
-version = "0.2.3"
+version = "0.2.5"
 dependencies = [
  "alloy",
  "anyhow",
