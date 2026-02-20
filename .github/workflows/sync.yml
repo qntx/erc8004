@@ -2,8 +2,8 @@ name: Sync ERC-8004 Events
 
 on:
   schedule:
-    # Run every 6 hours — incremental sync is fast once initial data exists.
-    - cron: "0 */6 * * *"
+    # Run every 15 minutes — incremental sync takes seconds once seeded.
+    - cron: "*/15 * * * *"
   workflow_dispatch:
     inputs:
       chain:
@@ -24,24 +24,38 @@ env:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 15
+    concurrency:
+      group: sync-events
+      cancel-in-progress: false
 
     steps:
       - uses: actions/checkout@v6
 
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Cache release binary
+        id: bin-cache
+        uses: actions/cache@v5
+        with:
+          path: target/release/erc8004-events
+          key: ${{ runner.os }}-erc8004-events-${{ hashFiles('**/Cargo.lock', 'erc8004-events/src/**', 'erc8004/src/**') }}
 
-      - uses: actions/cache@v5
+      - name: Setup Rust
+        if: steps.bin-cache.outputs.cache-hit != 'true'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        if: steps.bin-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry/index
             ~/.cargo/registry/cache
             ~/.cargo/git/db
-            target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
 
       - name: Build
+        if: steps.bin-cache.outputs.cache-hit != 'true'
         run: cargo build --release -p erc8004-events
 
       - name: Install Git LFS
@@ -73,7 +87,7 @@ jobs:
           if [ "${{ inputs.include_testnets }}" = "true" ]; then
             ARGS="$ARGS --include-testnets"
           fi
-          ./target/release/erc8004-events $ARGS
+          ./target/release/erc8004-events --config config.toml $ARGS
 
       - name: Push to HuggingFace
         run: |
