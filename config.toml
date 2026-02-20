@@ -95,7 +95,7 @@ rpcs = [
     "https://mantle-public.nodies.app",
 ]
 
-[chains.6342]  # MegaETH
+[chains.4326]  # MegaETH
 rpcs = [
     "https://mainnet.megaeth.com/rpc",
 ]

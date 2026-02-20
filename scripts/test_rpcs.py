@@ -223,8 +223,8 @@ CHAINS: list[tuple[int, str, int, list[tuple[str, str]]]] = [
         ("OnFinality",   "https://abstract.api.onfinality.io/public"),
         ("Tatum",        "https://abstract-mainnet.gateway.tatum.io"),
     ]),
-    # ── MegaETH (6342) ───────────────────────────────────────────────
-    (6342, "MegaETH", 7_833_805, [
+    # ── MegaETH (4326) ───────────────────────────────────────────────
+    (4326, "MegaETH", 7_833_805, [
         ("MegaETH",      "https://rpc.megaeth.com"),
         ("MegaETH-mn",   "https://mainnet.megaeth.com/rpc"),
     ]),
