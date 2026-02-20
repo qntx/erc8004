@@ -199,6 +199,10 @@ async fn sync_contract<P: Provider>(
 /// # Errors
 ///
 /// Returns an error only if *all* RPCs fail.
+///
+/// # Panics
+///
+/// Panics if `rpcs` is empty.
 pub async fn sync_chain(chain: &ChainConfig, data_dir: &Path, rpcs: &[String]) -> Result<()> {
     let chain_id = chain.chain_id();
     let mut last_err = None;
@@ -246,7 +250,7 @@ async fn try_sync(chain: &ChainConfig, data_dir: &Path, rpc_url: &str) -> Result
         .context("get_block_number failed")?;
 
     let start =
-        Cursor::load(&chain_dir)?.map_or_else(|| chain.sync_start_block(), |c| c.last_block + 1);
+        Cursor::load(&chain_dir)?.map_or_else(|| chain.deployment_block, |c| c.last_block + 1);
 
     if start > latest {
         tracing::info!(chain_id, latest, "already up to date");

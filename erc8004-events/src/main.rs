@@ -123,11 +123,10 @@ async fn cmd_sync(
     let chain_rpcs: Vec<(chains::ChainConfig, Vec<String>)> = targets
         .iter()
         .map(|chain| {
-            let rpcs = if let Some(ref url) = rpc_override {
-                vec![url.clone()]
-            } else {
-                config.rpcs_for(chain.chain_id(), chain.default_rpc)
-            };
+            let rpcs = rpc_override.as_ref().map_or_else(
+                || config.rpcs_for(chain.chain_id(), chain.default_rpc),
+                |url| vec![url.clone()],
+            );
             (**chain, rpcs)
         })
         .collect();
@@ -199,7 +198,7 @@ fn cmd_list(config: &Config) {
         println!(
             "{:<12} {:<20} {:<8} {:<15} {:<6} {}",
             chain.chain_id(),
-            format!("{:?}", chain.network),
+            chain.name,
             net_type,
             chain.deployment_block,
             rpcs.len(),

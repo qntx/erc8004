@@ -29,13 +29,23 @@ REQUEST_TIMEOUT = 15
 # Each chain: (chain_id, name, deployment_block, [(provider, url), ...])
 
 CHAINS: list[tuple[int, str, int, list[tuple[str, str]]]] = [
+    # ── Ethereum (1) ─────────────────────────────────────────────────
     (1, "Ethereum", 24_339_871, [
         ("PublicNode",   "https://ethereum-rpc.publicnode.com"),
         ("dRPC",         "https://eth.drpc.org"),
         ("1RPC",         "https://1rpc.io/eth"),
-        ("Tenderly",     "https://ethereum.gateway.tenderly.co"),
+        ("Tenderly",     "https://mainnet.gateway.tenderly.co"),
         ("Blast",        "https://eth-mainnet.public.blastapi.io"),
+        ("LlamaRPC",     "https://eth.llamarpc.com"),
+        ("OnFinality",   "https://eth.api.onfinality.io/public"),
+        ("Lava",         "https://eth1.lava.build"),
+        ("Nodies",       "https://ethereum-public.nodies.app"),
+        ("0xRPC",        "https://0xrpc.io/eth"),
+        ("SubQuery",     "https://ethereum.rpc.subquery.network/public"),
+        ("MeowRPC",      "https://eth.meowrpc.com"),
+        ("Merkle",       "https://eth.merkle.io"),
     ]),
+    # ── Base (8453) ──────────────────────────────────────────────────
     (8453, "Base", 41_663_783, [
         ("Base Official","https://mainnet.base.org"),
         ("PublicNode",   "https://base-rpc.publicnode.com"),
@@ -43,14 +53,30 @@ CHAINS: list[tuple[int, str, int, list[tuple[str, str]]]] = [
         ("1RPC",         "https://1rpc.io/base"),
         ("Tenderly",     "https://base.gateway.tenderly.co"),
         ("Blast",        "https://base-mainnet.public.blastapi.io"),
+        ("LlamaRPC",     "https://base.llamarpc.com"),
+        ("OnFinality",   "https://base.api.onfinality.io/public"),
+        ("Lava",         "https://base.lava.build"),
+        ("Nodies",       "https://base-public.nodies.app"),
+        ("SubQuery",     "https://base.rpc.subquery.network/public"),
+        ("MeowRPC",      "https://base.meowrpc.com"),
+        ("Tatum",        "https://base-mainnet.gateway.tatum.io"),
     ]),
+    # ── Polygon (137) ────────────────────────────────────────────────
     (137, "Polygon", 73_019_847, [
         ("Tenderly",     "https://polygon.gateway.tenderly.co"),
         ("dRPC",         "https://polygon.drpc.org"),
         ("1RPC",         "https://1rpc.io/matic"),
         ("PublicNode",   "https://polygon-bor-rpc.publicnode.com"),
         ("Blast",        "https://polygon-mainnet.public.blastapi.io"),
+        ("Nodies",       "https://polygon-public.nodies.app"),
+        ("OnFinality",   "https://polygon.api.onfinality.io/public"),
+        ("SubQuery",     "https://polygon.rpc.subquery.network/public"),
+        ("Lava",         "https://polygon.lava.build"),
+        ("MeowRPC",      "https://polygon.meowrpc.com"),
+        ("Tatum",        "https://polygon-mainnet.gateway.tatum.io"),
+        ("Sentio",       "https://rpc.sentio.xyz/matic"),
     ]),
+    # ── Arbitrum One (42161) ─────────────────────────────────────────
     (42161, "Arbitrum", 327_832_400, [
         ("PublicNode",   "https://arbitrum-one-rpc.publicnode.com"),
         ("Arbitrum",     "https://arb1.arbitrum.io/rpc"),
@@ -58,14 +84,36 @@ CHAINS: list[tuple[int, str, int, list[tuple[str, str]]]] = [
         ("1RPC",         "https://1rpc.io/arb"),
         ("Tenderly",     "https://arbitrum.gateway.tenderly.co"),
         ("Blast",        "https://arbitrum-one.public.blastapi.io"),
+        ("Nodies",       "https://arbitrum-one-public.nodies.app"),
+        ("Lava",         "https://arb1.lava.build"),
+        ("OnFinality",   "https://arbitrum.api.onfinality.io/public"),
+        ("SubQuery",     "https://arbitrum.rpc.subquery.network/public"),
+        ("MeowRPC",      "https://arbitrum.meowrpc.com"),
+        ("Tatum",        "https://arb-one-mainnet.gateway.tatum.io"),
+        ("Sentio",       "https://rpc.sentio.xyz/arbitrum-one"),
     ]),
+    # ── BSC (56) ─────────────────────────────────────────────────────
     (56, "BSC", 49_143_533, [
         ("dRPC",         "https://bsc.drpc.org"),
         ("Blast",        "https://bsc-mainnet.public.blastapi.io"),
         ("1RPC",         "https://1rpc.io/bnb"),
         ("PublicNode",   "https://bsc-rpc.publicnode.com"),
-        ("Tenderly",     "https://bsc.gateway.tenderly.co"),
+        ("LlamaRPC",     "https://binance.llamarpc.com"),
+        ("OnFinality",   "https://bnb.api.onfinality.io/public"),
+        ("Nodies",       "https://binance-smart-chain-public.nodies.app"),
+        ("SubQuery",     "https://bnb.rpc.subquery.network/public"),
+        ("MeowRPC",      "https://bsc.meowrpc.com"),
+        ("Tatum",        "https://bsc-mainnet.gateway.tatum.io"),
+        ("48Club",       "https://rpc-bsc.48.club"),
+        ("BNB-DS1",      "https://bsc-dataseed.bnbchain.org"),
+        ("BNB-DS2",      "https://bsc-dataseed1.bnbchain.org"),
+        ("BNB-DS3",      "https://bsc-dataseed2.bnbchain.org"),
+        ("BNB-DS4",      "https://bsc-dataseed3.bnbchain.org"),
+        ("BNB-DS5",      "https://bsc-dataseed4.bnbchain.org"),
+        ("NowNodes",     "https://public-bsc.nownodes.io"),
+        ("Sentio",       "https://rpc.sentio.xyz/bsc"),
     ]),
+    # ── Optimism (10) ────────────────────────────────────────────────
     (10, "Optimism", 147_956_461, [
         ("Optimism",     "https://mainnet.optimism.io"),
         ("PublicNode",   "https://optimism-rpc.publicnode.com"),
@@ -73,58 +121,112 @@ CHAINS: list[tuple[int, str, int, list[tuple[str, str]]]] = [
         ("1RPC",         "https://1rpc.io/op"),
         ("Tenderly",     "https://optimism.gateway.tenderly.co"),
         ("Blast",        "https://optimism-mainnet.public.blastapi.io"),
+        ("Nodies",       "https://optimism-public.nodies.app"),
+        ("OnFinality",   "https://optimism.api.onfinality.io/public"),
+        ("SubQuery",     "https://optimism.rpc.subquery.network/public"),
+        ("Lava",         "https://optimism.lava.build"),
+        ("MeowRPC",      "https://optimism.meowrpc.com"),
+        ("Tatum",        "https://optimism-mainnet.gateway.tatum.io"),
+        ("Sentio",       "https://rpc.sentio.xyz/optimism"),
     ]),
+    # ── Avalanche C-Chain (43114) ────────────────────────────────────
     (43114, "Avalanche", 77_893_000, [
         ("Avalanche",    "https://api.avax.network/ext/bc/C/rpc"),
         ("PublicNode",   "https://avalanche-c-chain-rpc.publicnode.com"),
         ("dRPC",         "https://avalanche.drpc.org"),
         ("1RPC",         "https://1rpc.io/avax/c"),
         ("Blast",        "https://ava-mainnet.public.blastapi.io/ext/bc/C/rpc"),
+        ("Tenderly",     "https://avalanche-mainnet.gateway.tenderly.co"),
+        ("OnFinality",   "https://avalanche.api.onfinality.io/public/ext/bc/C/rpc"),
+        ("Nodies",       "https://avalanche-public.nodies.app/ext/bc/C/rpc"),
+        ("MeowRPC",      "https://avax.meowrpc.com"),
+        ("Sentio",       "https://rpc.sentio.xyz/avalanche"),
     ]),
+    # ── Celo (42220) ─────────────────────────────────────────────────
     (42220, "Celo", 32_479_428, [
         ("Celo",         "https://forno.celo.org"),
         ("dRPC",         "https://celo.drpc.org"),
         ("1RPC",         "https://1rpc.io/celo"),
         ("PublicNode",   "https://celo-rpc.publicnode.com"),
+        ("OnFinality",   "https://celo.api.onfinality.io/public"),
+        ("Tatum",        "https://celo-mainnet.gateway.tatum.io"),
+        ("Stakely",      "https://celo-json-rpc.stakely.io"),
     ]),
+    # ── Gnosis (100) ─────────────────────────────────────────────────
     (100, "Gnosis", 39_025_823, [
         ("Gnosis",       "https://rpc.gnosischain.com"),
         ("dRPC",         "https://gnosis.drpc.org"),
         ("1RPC",         "https://1rpc.io/gnosis"),
         ("PublicNode",   "https://gnosis-rpc.publicnode.com"),
         ("Blast",        "https://gnosis-mainnet.public.blastapi.io"),
+        ("Nodies",       "https://gnosis-public.nodies.app"),
+        ("OnFinality",   "https://gnosis.api.onfinality.io/public"),
+        ("Tatum",        "https://gno-mainnet.gateway.tatum.io"),
     ]),
+    # ── Scroll (534352) ──────────────────────────────────────────────
     (534352, "Scroll", 15_577_120, [
         ("Scroll",       "https://rpc.scroll.io"),
         ("dRPC",         "https://scroll.drpc.org"),
         ("1RPC",         "https://1rpc.io/scroll"),
         ("PublicNode",   "https://scroll-rpc.publicnode.com"),
+        ("Blast",        "https://scroll-mainnet.public.blastapi.io"),
+        ("OnFinality",   "https://scroll.api.onfinality.io/public"),
+        ("Nodies",       "https://scroll-public.nodies.app"),
     ]),
+    # ── Linea (59144) ────────────────────────────────────────────────
     (59144, "Linea", 28_949_707, [
         ("Linea",        "https://rpc.linea.build"),
         ("dRPC",         "https://linea.drpc.org"),
         ("1RPC",         "https://1rpc.io/linea"),
         ("PublicNode",   "https://linea-rpc.publicnode.com"),
+        ("Sentio",       "https://rpc.sentio.xyz/linea"),
     ]),
+    # ── Mantle (5000) ────────────────────────────────────────────────
     (5000, "Mantle", 91_520_634, [
         ("Mantle",       "https://rpc.mantle.xyz"),
         ("dRPC",         "https://mantle.drpc.org"),
         ("1RPC",         "https://1rpc.io/mantle"),
         ("PublicNode",   "https://mantle-rpc.publicnode.com"),
+        ("Blast",        "https://mantle-mainnet.public.blastapi.io"),
+        ("OnFinality",   "https://mantle.api.onfinality.io/public"),
+        ("Nodies",       "https://mantle-public.nodies.app"),
     ]),
+    # ── Taiko (167000) ───────────────────────────────────────────────
     (167000, "Taiko", 871_920, [
         ("Taiko",        "https://rpc.mainnet.taiko.xyz"),
         ("dRPC",         "https://taiko.drpc.org"),
         ("PublicNode",   "https://taiko-rpc.publicnode.com"),
+        ("Tenderly",     "https://taiko-mainnet.gateway.tenderly.co"),
+        ("Stakely",      "https://taiko-json-rpc.stakely.io"),
+        ("Taiko-alt",    "https://rpc.taiko.xyz"),
     ]),
+    # ── Monad (143) ──────────────────────────────────────────────────
     (143, "Monad", 56_017_606, [
         ("Monad",        "https://rpc.monad.xyz"),
+        ("Monad-rpc1",   "https://rpc1.monad.xyz"),
+        ("Monad-rpc2",   "https://rpc2.monad.xyz"),
+        ("Monad-rpc3",   "https://rpc3.monad.xyz"),
+        ("Monad-rpc4",   "https://rpc4.monad.xyz"),
+        ("dRPC",         "https://monad-mainnet.drpc.org"),
+        ("OnFinality",   "https://monad-mainnet.api.onfinality.io/public"),
+        ("Tatum",        "https://monad-mainnet.gateway.tatum.io"),
+        ("OriginStake",  "https://infra.originstake.com/monad/evm"),
+        ("Sentio",       "https://rpc.sentio.xyz/monad-mainnet"),
+        ("MonadInfra",   "https://rpc-mainnet.monadinfra.com"),
+        ("blxrbdn",      "https://monad.rpc.blxrbdn.com"),
+        ("SpiderNode",   "https://monad-mainnet-rpc.spidernode.net"),
     ]),
+    # ── Abstract (2741) ──────────────────────────────────────────────
     (2741, "Abstract", 41_233_800, [
         ("Abstract",     "https://api.mainnet.abs.xyz"),
+        ("dRPC",         "https://abstract.drpc.org"),
+        ("OnFinality",   "https://abstract.api.onfinality.io/public"),
+        ("Tatum",        "https://abstract-mainnet.gateway.tatum.io"),
     ]),
+    # ── MegaETH (6342) ───────────────────────────────────────────────
     (6342, "MegaETH", 7_833_805, [
         ("MegaETH",      "https://rpc.megaeth.com"),
+        ("MegaETH-mn",   "https://mainnet.megaeth.com/rpc"),
     ]),
 ]
 

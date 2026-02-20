@@ -1,0 +1,115 @@
+# ERC-8004 events sync configuration.
+# RPC endpoints per chain, ordered by priority (best first).
+# The sync engine tries each in order; on failure it falls back.
+
+[chains.1]  # Ethereum
+rpcs = [
+    "https://eth-mainnet.public.blastapi.io",
+    "https://1rpc.io/eth",
+    "https://eth.drpc.org",
+    "https://ethereum-rpc.publicnode.com",
+]
+
+[chains.10]  # Optimism
+rpcs = [
+    "https://optimism.gateway.tenderly.co",
+    "https://optimism.drpc.org",
+    "https://1rpc.io/op",
+    "https://mainnet.optimism.io",
+    "https://optimism-rpc.publicnode.com",
+]
+
+[chains.56]  # BSC
+rpcs = [
+    "https://bsc-mainnet.public.blastapi.io",
+]
+
+[chains.100]  # Gnosis
+rpcs = [
+    "https://rpc.gnosischain.com",
+    "https://gnosis-rpc.publicnode.com",
+    "https://gnosis.drpc.org",
+    "https://1rpc.io/gnosis",
+]
+
+[chains.137]  # Polygon
+rpcs = [
+    "https://polygon.gateway.tenderly.co",
+    "https://polygon.drpc.org",
+    "https://1rpc.io/matic",
+]
+
+[chains.143]  # Monad
+rpcs = [
+    "https://rpc.monad.xyz",
+]
+
+[chains.2741]  # Abstract
+rpcs = [
+    "https://api.mainnet.abs.xyz",
+]
+
+[chains.5000]  # Mantle
+rpcs = [
+    "https://mantle-rpc.publicnode.com",
+    "https://rpc.mantle.xyz",
+    "https://mantle.drpc.org",
+    "https://1rpc.io/mantle",
+]
+
+[chains.8453]  # Base
+rpcs = [
+    "https://base.gateway.tenderly.co",
+    "https://base-mainnet.public.blastapi.io",
+    "https://mainnet.base.org",
+    "https://1rpc.io/base",
+    "https://base.drpc.org",
+]
+
+[chains.42161]  # Arbitrum
+rpcs = [
+    "https://arb1.arbitrum.io/rpc",
+    "https://arbitrum-one.public.blastapi.io",
+    "https://arbitrum-one-rpc.publicnode.com",
+    "https://arbitrum.drpc.org",
+    "https://1rpc.io/arb",
+]
+
+[chains.42220]  # Celo
+rpcs = [
+    "https://forno.celo.org",
+    "https://celo-rpc.publicnode.com",
+    "https://celo.drpc.org",
+    "https://1rpc.io/celo",
+]
+
+[chains.43114]  # Avalanche
+rpcs = [
+    "https://avalanche.drpc.org",
+    "https://1rpc.io/avax/c",
+    "https://api.avax.network/ext/bc/C/rpc",
+    "https://avalanche-c-chain-rpc.publicnode.com",
+]
+
+[chains.59144]  # Linea
+rpcs = [
+    "https://rpc.linea.build",
+    "https://linea.drpc.org",
+    "https://linea-rpc.publicnode.com",
+    "https://1rpc.io/linea",
+]
+
+[chains.167000]  # Taiko
+rpcs = [
+    "https://rpc.mainnet.taiko.xyz",
+    "https://taiko-rpc.publicnode.com",
+    "https://taiko.drpc.org",
+]
+
+[chains.534352]  # Scroll
+rpcs = [
+    "https://scroll-rpc.publicnode.com",
+    "https://rpc.scroll.io",
+    "https://scroll.drpc.org",
+    "https://1rpc.io/scroll",
+]
