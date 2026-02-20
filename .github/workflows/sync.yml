@@ -2,7 +2,8 @@ name: Sync ERC-8004 Events
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    # Run every 6 hours — incremental sync is fast once initial data exists.
+    - cron: "0 */6 * * *"
   workflow_dispatch:
     inputs:
       chain:
@@ -23,7 +24,7 @@ env:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 50
 
     steps:
       - uses: actions/checkout@v6
@@ -44,23 +45,45 @@ jobs:
         run: cargo build --release -p erc8004-events
 
       - name: Install Git LFS
-        run: git lfs install
+        run: |
+          git lfs install
+          git config --global lfs.concurrenttransfers 4
 
+      # Clone existing dataset (with cursors + parquet) for incremental sync.
+      # The repository MUST be seeded with an initial full sync before this
+      # workflow can operate efficiently. See README for instructions.
       - name: Clone HuggingFace dataset
         run: |
-          git clone "https://x-access-token:${{ secrets.HF_TOKEN }}@huggingface.co/datasets/${HF_REPO}" hf-data \
-            || { git init hf-data && git -C hf-data remote add origin "https://x-access-token:${{ secrets.HF_TOKEN }}@huggingface.co/datasets/${HF_REPO}"; }
+          GIT_LFS_SKIP_SMUDGE=0 git clone \
+            "https://x-access-token:${{ secrets.HF_TOKEN }}@huggingface.co/datasets/${HF_REPO}" \
+            hf-data || {
+              echo "::warning::HF repo not found — creating empty dataset"
+              mkdir -p hf-data
+              cd hf-data
+              git init
+              git remote add origin "https://x-access-token:${{ secrets.HF_TOKEN }}@huggingface.co/datasets/${HF_REPO}"
+            }
 
       - name: Sync events
         run: |
           ARGS="sync --data-dir hf-data"
-          [ -n "${{ inputs.chain }}" ] && ARGS="$ARGS --chain ${{ inputs.chain }}"
-          [ "${{ inputs.include_testnets }}" = "true" ] && ARGS="$ARGS --include-testnets"
+          if [ -n "${{ inputs.chain }}" ]; then
+            ARGS="$ARGS --chain ${{ inputs.chain }}"
+          fi
+          if [ "${{ inputs.include_testnets }}" = "true" ]; then
+            ARGS="$ARGS --include-testnets"
+          fi
           ./target/release/erc8004-events $ARGS
 
       - name: Push to HuggingFace
         run: |
           cd hf-data
+
+          # Track parquet files with Git LFS
+          if [ ! -f .gitattributes ]; then
+            echo "*.parquet filter=lfs diff=lfs merge=lfs -text" > .gitattributes
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A

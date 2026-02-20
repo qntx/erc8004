@@ -61,14 +61,14 @@ pub const ALL: &[ChainConfig] = &[
         network: Network::PolygonMainnet,
         deployment_block: 73_019_847,
         first_event_block: None,
-        default_rpc: "https://polygon-rpc.com",
+        default_rpc: "https://polygon.gateway.tenderly.co",
         is_testnet: false,
     },
     ChainConfig {
         network: Network::ArbitrumMainnet,
         deployment_block: 327_832_400,
         first_event_block: None,
-        default_rpc: "https://arb1.arbitrum.io/rpc",
+        default_rpc: "https://arbitrum-one-rpc.publicnode.com",
         is_testnet: false,
     },
     ChainConfig {
@@ -103,7 +103,7 @@ pub const ALL: &[ChainConfig] = &[
         network: Network::BscMainnet,
         deployment_block: 49_143_533,
         first_event_block: None,
-        default_rpc: "https://bsc-rpc.publicnode.com",
+        default_rpc: "https://bsc.drpc.org",
         is_testnet: false,
     },
     ChainConfig {

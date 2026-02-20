@@ -6,13 +6,10 @@
 //! # Usage
 //!
 //! ```bash
-//! # Sync all mainnet chains using default public RPCs
+//! # Sync all mainnet chains (uses config.toml RPC pool if present)
 //! erc8004-events sync --data-dir ./data
 //!
-//! # Sync a specific chain
-//! erc8004-events sync --data-dir ./data --chain 8453
-//!
-//! # Sync with a custom RPC endpoint
+//! # Sync a specific chain with a custom RPC
 //! erc8004-events sync --data-dir ./data --chain 8453 --rpc https://my-rpc.example.com
 //!
 //! # Include testnets
@@ -20,15 +17,22 @@
 //! ```
 
 use std::path::PathBuf;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicU32, Ordering};
 
 use anyhow::{Context, Result, bail};
 use clap::{Parser, Subcommand};
-use erc8004_events::{chains, fetcher};
+use erc8004_events::{chains, config::Config, fetcher};
+use tokio::task::JoinSet;
 
 /// ERC-8004 raw on-chain event archiver.
 #[derive(Debug, Parser)]
 #[command(name = "erc8004-events", version, about)]
 struct Cli {
+    /// Path to config.toml (RPC pool configuration).
+    #[arg(long, default_value = "config.toml", global = true)]
+    config: PathBuf,
+
     #[command(subcommand)]
     command: Command,
 }
@@ -43,11 +47,10 @@ enum Command {
         data_dir: PathBuf,
 
         /// Sync only a specific chain by its EIP-155 chain ID.
-        /// If omitted, all mainnet chains are synced.
         #[arg(long)]
         chain: Option<u64>,
 
-        /// Override the default RPC endpoint for the target chain.
+        /// Override all configured RPCs with a single endpoint.
         /// Only valid when `--chain` is also specified.
         #[arg(long)]
         rpc: Option<String>,
@@ -55,6 +58,10 @@ enum Command {
         /// Include testnet chains in the sync.
         #[arg(long)]
         include_testnets: bool,
+
+        /// Number of chains to sync in parallel.
+        #[arg(long, default_value = "16")]
+        parallel: usize,
     },
 
     /// List all known chain configurations.
@@ -63,7 +70,6 @@ enum Command {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Initialize structured logging.
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
@@ -73,6 +79,7 @@ async fn main() -> Result<()> {
         .init();
 
     let cli = Cli::parse();
+    let config = Config::load(&cli.config)?;
 
     match cli.command {
         Command::Sync {
@@ -80,9 +87,10 @@ async fn main() -> Result<()> {
             chain,
             rpc,
             include_testnets,
-        } => cmd_sync(data_dir, chain, rpc, include_testnets).await,
+            parallel,
+        } => cmd_sync(&config, data_dir, chain, rpc, include_testnets, parallel).await,
         Command::List => {
-            cmd_list();
+            cmd_list(&config);
             Ok(())
         }
     }
@@ -90,12 +98,13 @@ async fn main() -> Result<()> {
 
 /// Execute the `sync` subcommand.
 async fn cmd_sync(
+    config: &Config,
     data_dir: PathBuf,
     chain_filter: Option<u64>,
     rpc_override: Option<String>,
     include_testnets: bool,
+    parallel: usize,
 ) -> Result<()> {
-    // Validate args: --rpc requires --chain.
     if rpc_override.is_some() && chain_filter.is_none() {
         bail!("--rpc requires --chain to be specified");
     }
@@ -110,33 +119,66 @@ async fn cmd_sync(
             .collect()
     };
 
+    // Build per-chain RPC lists: CLI override > config.toml > built-in default.
+    let chain_rpcs: Vec<(chains::ChainConfig, Vec<String>)> = targets
+        .iter()
+        .map(|chain| {
+            let rpcs = if let Some(ref url) = rpc_override {
+                vec![url.clone()]
+            } else {
+                config.rpcs_for(chain.chain_id(), chain.default_rpc)
+            };
+            (**chain, rpcs)
+        })
+        .collect();
+
+    let concurrency = parallel.min(chain_rpcs.len()).max(1);
     tracing::info!(
-        chains = targets.len(),
+        chains = chain_rpcs.len(),
+        concurrency,
         data_dir = %data_dir.display(),
         "starting sync"
     );
 
-    let mut success = 0u32;
-    let mut failed = 0u32;
+    let data_dir = Arc::new(data_dir);
+    let success = Arc::new(AtomicU32::new(0));
+    let failed = Arc::new(AtomicU32::new(0));
+    let semaphore = Arc::new(tokio::sync::Semaphore::new(concurrency));
+    let mut set = JoinSet::new();
 
-    for chain in &targets {
-        let chain_id = chain.chain_id();
-        match fetcher::sync_chain(chain, &data_dir, rpc_override.as_deref()).await {
-            Ok(()) => {
-                success += 1;
-                tracing::info!(chain_id, "sync complete");
+    for (chain, rpcs) in chain_rpcs {
+        let data_dir = Arc::clone(&data_dir);
+        let success = Arc::clone(&success);
+        let failed = Arc::clone(&failed);
+        let semaphore = Arc::clone(&semaphore);
+
+        set.spawn(async move {
+            let _permit = semaphore.acquire().await.expect("semaphore closed");
+            let chain_id = chain.chain_id();
+            match fetcher::sync_chain(&chain, &data_dir, &rpcs).await {
+                Ok(()) => {
+                    success.fetch_add(1, Ordering::Relaxed);
+                    tracing::info!(chain_id, "sync complete");
+                }
+                Err(e) => {
+                    failed.fetch_add(1, Ordering::Relaxed);
+                    tracing::error!(chain_id, error = %e, "sync failed");
+                }
             }
-            Err(e) => {
-                failed += 1;
-                tracing::error!(chain_id, error = %e, "sync failed");
-            }
-        }
+        });
     }
 
-    tracing::info!(success, failed, "sync finished");
+    while set.join_next().await.is_some() {}
 
-    if failed > 0 {
-        bail!("{failed} chain(s) failed to sync");
+    let s = success.load(Ordering::Relaxed);
+    let f = failed.load(Ordering::Relaxed);
+    tracing::info!(success = s, failed = f, "sync finished");
+
+    if f > 0 && s == 0 {
+        bail!("all {f} chain(s) failed to sync");
+    }
+    if f > 0 {
+        tracing::warn!(failed = f, success = s, "some chains failed");
     }
 
     Ok(())
@@ -144,22 +186,24 @@ async fn cmd_sync(
 
 /// Execute the `list` subcommand.
 #[allow(clippy::print_stdout)]
-fn cmd_list() {
+fn cmd_list(config: &Config) {
     println!(
-        "{:<12} {:<20} {:<8} {:<15} RPC",
-        "Chain ID", "Name", "Type", "Deploy Block"
+        "{:<12} {:<20} {:<8} {:<15} {:<6} RPCs",
+        "Chain ID", "Name", "Type", "Deploy Block", "Pool"
     );
-    println!("{}", "-".repeat(90));
+    println!("{}", "-".repeat(100));
 
     for chain in chains::ALL {
         let net_type = if chain.is_testnet { "test" } else { "main" };
+        let rpcs = config.rpcs_for(chain.chain_id(), chain.default_rpc);
         println!(
-            "{:<12} {:<20} {:<8} {:<15} {}",
+            "{:<12} {:<20} {:<8} {:<15} {:<6} {}",
             chain.chain_id(),
             format!("{:?}", chain.network),
             net_type,
             chain.deployment_block,
-            chain.default_rpc,
+            rpcs.len(),
+            rpcs[0],
         );
     }
 }
