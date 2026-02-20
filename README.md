@@ -5,6 +5,7 @@
 [![docs.rs][doc-badge]][doc-url]
 [![License][license-badge]][license-url]
 [![Rust][rust-badge]][rust-url]
+[![Dataset][hf-badge]][hf-url]
 
 [ci-badge]: https://github.com/qntx/erc8004/actions/workflows/rust.yml/badge.svg
 [ci-url]: https://github.com/qntx/erc8004/actions/workflows/rust.yml
@@ -16,6 +17,8 @@
 [license-url]: LICENSE-MIT
 [rust-badge]: https://img.shields.io/badge/rust-edition%202024-orange.svg
 [rust-url]: https://doc.rust-lang.org/edition-guide/
+[hf-badge]: https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-erc8004--events-yellow.svg
+[hf-url]: https://huggingface.co/datasets/qntx/erc8004-events
 
 **Type-safe Rust SDK for the [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) Trustless Agents standard — on-chain identity, reputation, and validation registries for AI agents.**
 
@@ -157,6 +160,66 @@ Contracts are deployed via CREATE2, so all mainnets share the same addresses and
 ```bash
 cargo run --example query_agent
 cargo run --example registration_file
+```
+
+## Event Dataset
+
+All on-chain events (identity registrations, reputation updates, etc.) are continuously archived to a public HuggingFace dataset:
+
+**[`qntx/erc8004-events`](https://huggingface.co/datasets/qntx/erc8004-events)** — refreshed every 15 minutes via [automated sync](.github/workflows/sync.yml).
+
+The dataset covers all 16 mainnet chains and stores raw `eth_getLogs` output in Parquet format, organized by chain ID:
+
+```text
+<chain_id>/
+  identity.parquet    # IdentityRegistry events
+  reputation.parquet  # ReputationRegistry events
+  cursor.json         # Sync cursor (last synced block)
+```
+
+### Load with Python
+
+```python
+import pandas as pd
+
+# All identity events on Ethereum mainnet
+df = pd.read_parquet("hf://datasets/qntx/erc8004-events/1/identity.parquet")
+print(f"{len(df)} events")
+```
+
+```python
+from datasets import load_dataset
+
+# Load Base reputation events
+ds = load_dataset("qntx/erc8004-events", data_files="8453/reputation.parquet")
+```
+
+### Parquet Schema
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `block_number` | `uint64` | Block in which the event was emitted |
+| `tx_hash` | `string` | Transaction hash (0x-prefixed) |
+| `log_index` | `uint32` | Log index within the transaction |
+| `address` | `string` | Contract address that emitted the event |
+| `topic0` | `string` | Event signature hash |
+| `topic1` | `string` | First indexed parameter (if any) |
+| `topic2` | `string` | Second indexed parameter (if any) |
+| `topic3` | `string` | Third indexed parameter (if any) |
+| `data` | `string` | ABI-encoded non-indexed parameters |
+
+### Local Sync
+
+You can also run the sync tool locally to build your own copy of the dataset:
+
+```bash
+cargo install erc8004-events
+
+# Sync all mainnet chains
+erc8004-events --config config.toml sync --data-dir ./data
+
+# Sync a specific chain
+erc8004-events --config config.toml sync --data-dir ./data --chain 1
 ```
 
 ## Security

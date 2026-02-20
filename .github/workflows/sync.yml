@@ -2,8 +2,8 @@ name: Sync ERC-8004 Events
 
 on:
   schedule:
-    # Run every hour — incremental sync takes seconds once seeded.
-    - cron: "0 * * * *"
+    # Run every 15 minutes — incremental sync takes seconds once seeded.
+    - cron: "*/15 * * * *"
   workflow_dispatch:
     inputs:
       chain:
