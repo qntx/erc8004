@@ -1,13 +1,11 @@
-//! RPC event fetching and chain sync orchestration.
+//! Chain sync orchestration and adaptive RPC event fetching.
 //!
-//! For each chain the fetcher:
-//! 1. Reads the existing Parquet file (if any) to collect prior events.
-//! 2. Queries `eth_getLogs` in adaptive batches from the cursor to the
-//!    chain tip.
-//! 3. Merges old + new events and rewrites the Parquet file atomically.
-//! 4. Updates the chain cursor.
+//! - [`sync_all`] — parallel sync of multiple chains (main entry point).
+//! - [`sync_chain`] — single-chain sync with automatic RPC fallback.
 
 use std::path::Path;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::Duration;
 
 use alloy::primitives::Address;
@@ -15,45 +13,63 @@ use alloy::providers::{Provider, ProviderBuilder};
 use alloy::rpc::types::{Filter, Log};
 use anyhow::{Context, Result, bail};
 use arrow_array::RecordBatch;
+use tokio::task::JoinSet;
 
 use crate::chains::ChainConfig;
 use crate::cursor::Cursor;
 use crate::parquet;
 
-/// Per-request timeout for RPC calls.
-const REQUEST_TIMEOUT: Duration = Duration::from_secs(30);
+/// Tunable parameters for a sync run.
+#[derive(Debug, Clone, Copy)]
+pub struct SyncOptions {
+    /// Delay between consecutive `eth_getLogs` calls.
+    pub batch_delay: Duration,
+    /// Per-request timeout.
+    pub request_timeout: Duration,
+    /// Consecutive RPC errors before abandoning an endpoint.
+    pub max_errors: u32,
+    /// Chains synced in parallel.
+    pub concurrency: usize,
+}
 
-/// Delay between consecutive RPC calls to avoid rate-limiting.
-const INTER_BATCH_DELAY: Duration = Duration::from_millis(100);
+impl Default for SyncOptions {
+    fn default() -> Self {
+        Self {
+            batch_delay: Duration::from_millis(100),
+            request_timeout: Duration::from_secs(30),
+            max_errors: 10,
+            concurrency: 16,
+        }
+    }
+}
 
-/// Tracks `eth_getLogs` batch size with an adaptive ceiling.
+/// Adaptive block-range window (TCP slow-start style).
 ///
-/// On success the size doubles toward the ceiling; on error the ceiling
-/// is permanently lowered so the RPC's actual limit is learned once.
+/// Grows on success, shrinks on errors.  Only "range too large" errors
+/// lower the ceiling; transient errors leave it intact.
 struct Batcher {
     size: u64,
     ceiling: u64,
 }
 
 impl Batcher {
-    const DEFAULT: u64 = 2_000;
+    const INITIAL: u64 = 500;
+    const MAX_CEILING: u64 = 50_000;
     const MIN: u64 = 10;
 
     const fn new() -> Self {
         Self {
-            size: Self::DEFAULT,
-            ceiling: Self::DEFAULT,
+            size: Self::INITIAL,
+            ceiling: Self::MAX_CEILING,
         }
     }
 
-    /// Grow toward the learned ceiling after a successful request.
     fn grow(&mut self) {
         self.size = (self.size * 2).min(self.ceiling);
     }
 
-    /// Shrink and lower the ceiling after a failed request.
-    /// Returns `false` when already at the minimum (caller should bail).
-    fn shrink(&mut self) -> bool {
+    /// Permanently lower ceiling. Returns `false` at minimum.
+    fn shrink_for_range(&mut self) -> bool {
         if self.size <= Self::MIN {
             return false;
         }
@@ -61,140 +77,144 @@ impl Batcher {
         self.size = self.ceiling;
         true
     }
+
+    /// Halve without touching ceiling (transient recovery).
+    fn shrink_transient(&mut self) {
+        self.size = (self.size / 2).max(Self::MIN);
+    }
 }
 
-/// Maximum consecutive RPC errors before giving up.
-const MAX_CONSECUTIVE_ERRORS: u32 = 10;
+// ── Error classification ─────────────────────────────────────────────
 
-/// Progress is logged every N batches.
+/// Broad classification of RPC errors.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum RpcErrorKind {
+    /// `eth_getLogs` block range exceeds the node's limit.
+    RangeTooLarge,
+    /// HTTP 429 or explicit rate-limit response.
+    RateLimited,
+    /// Timeout, connection reset, or other transient issue.
+    Transient,
+}
+
+/// Heuristic classification covering major RPC providers.
+fn classify_error(err: &anyhow::Error) -> RpcErrorKind {
+    let msg = err.to_string().to_lowercase();
+
+    // Range / block-limit errors.
+    if msg.contains("block range")
+        || msg.contains("range too large")
+        || (msg.contains("exceed") && msg.contains("block"))
+        || msg.contains("max range")
+        || msg.contains("query returned more than")
+        || msg.contains("log response size exceeded")
+        || (msg.contains("eth_getlogs") && msg.contains("limit"))
+    {
+        return RpcErrorKind::RangeTooLarge;
+    }
+
+    // Rate-limit errors.
+    if msg.contains("429")
+        || msg.contains("rate limit")
+        || msg.contains("too many request")
+        || msg.contains("throttl")
+        || msg.contains("backoff")
+        || msg.contains("capacity")
+    {
+        return RpcErrorKind::RateLimited;
+    }
+
+    RpcErrorKind::Transient
+}
+
+/// Exponential back-off with clock-based jitter, capped at 30 s.
+fn backoff_duration(attempt: u32) -> Duration {
+    const BASE: u64 = 1_000;
+    const CAP: u64 = 30_000;
+    let ms = BASE.saturating_mul(1u64 << attempt.min(5)).min(CAP);
+    let half = ms / 2;
+    let jitter = u64::from(
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .subsec_nanos(),
+    ) % (half + 1);
+    Duration::from_millis(half + jitter)
+}
+
+/// Flush pending logs to Parquet every N events.
+const FLUSH_THRESHOLD: usize = 5_000;
+
+/// Log progress every N RPC requests.
 const PROGRESS_INTERVAL: u64 = 50;
 
-/// Fetch all logs from `address` in `[from, to]` using adaptive batches.
-async fn fetch_logs<P: Provider>(
-    provider: &P,
-    address: Address,
-    from: u64,
-    to: u64,
-    chain_id: u64,
-) -> Result<Vec<Log>> {
-    let mut logs = Vec::new();
-    let mut block = from;
-    let mut batch = Batcher::new();
-    let mut count = 0u64;
-    let mut errors = 0u32;
-
-    while block <= to {
-        let end = (block + batch.size - 1).min(to);
-        let filter = Filter::new()
-            .address(address)
-            .from_block(block)
-            .to_block(end);
-
-        let result = tokio::time::timeout(REQUEST_TIMEOUT, provider.get_logs(&filter))
-            .await
-            .map_err(|_| anyhow::anyhow!("request timed out"))
-            .and_then(|r| r.map_err(|e| anyhow::anyhow!("{e}")));
-
-        match result {
-            Ok(new) => {
-                errors = 0;
-                logs.extend(new);
-                batch.grow();
-                block = end + 1;
-                count += 1;
-                if count.is_multiple_of(PROGRESS_INTERVAL) {
-                    tracing::info!(chain_id, batch = count, block, progress = %pct(block, from, to), "fetching");
-                }
-                tokio::time::sleep(INTER_BATCH_DELAY).await;
-            }
-            Err(e) => {
-                errors += 1;
-                if errors >= MAX_CONSECUTIVE_ERRORS {
-                    bail!("chain {chain_id}: {errors} consecutive errors at block {block}: {e}");
-                }
-                if !batch.shrink() {
-                    bail!("chain {chain_id}: failed at min batch size (block {block}): {e}");
-                }
-                tracing::warn!(chain_id, block, batch_size = batch.size, error = %e, "retrying");
-                tokio::time::sleep(Duration::from_secs(2)).await;
-            }
-        }
-    }
-
-    Ok(logs)
-}
-
-/// Format progress as a percentage string.
-fn pct(current: u64, from: u64, to: u64) -> String {
-    if to <= from {
-        return "100%".into();
-    }
-    #[allow(clippy::cast_precision_loss)]
-    let ratio = (current - from) as f64 / (to - from) as f64 * 100.0;
-    format!("{ratio:.0}%")
-}
-
-/// Fetch new events for a single contract and append to its Parquet file.
+/// Synchronise multiple chains in parallel.
 ///
-/// Uses `max(block_number)` from the existing file as its effective start,
-/// preventing duplicate data when a prior run partially succeeded.
-async fn sync_contract<P: Provider>(
-    provider: &P,
-    address: Address,
-    name: &str,
-    chain_dir: &Path,
-    start: u64,
-    latest: u64,
-    chain_id: u64,
+/// # Errors
+///
+/// Returns an error only if **all** chains fail.
+///
+/// # Panics
+///
+/// Panics if the internal semaphore is closed (should never happen).
+pub async fn sync_all(
+    targets: Vec<(ChainConfig, Vec<String>)>,
+    data_dir: &Path,
+    opts: SyncOptions,
 ) -> Result<()> {
-    let path = chain_dir.join(format!("{name}.parquet"));
-    let mut batches = parquet::read(&path)?;
-
-    let from = parquet::max_block_number(&batches).map_or(start, |b| b + 1);
-    if from > latest {
-        tracing::info!(chain_id, contract = name, "already up to date");
-        return Ok(());
-    }
-
-    tracing::info!(chain_id, contract = name, %address, from, to = latest, "fetching logs");
-
-    let logs = fetch_logs(provider, address, from, latest, chain_id).await?;
-    if logs.is_empty() {
-        tracing::info!(chain_id, contract = name, "no new events");
-        return Ok(());
-    }
-
-    let (batch, count) = parquet::logs_to_batch(&logs)?;
-    if count == 0 {
-        return Ok(());
-    }
-
-    batches.push(batch);
-    parquet::write(&path, &batches)?;
-
-    let total: usize = batches.iter().map(RecordBatch::num_rows).sum();
+    let n = opts.concurrency.min(targets.len()).max(1);
     tracing::info!(
-        chain_id,
-        contract = name,
-        new_events = count,
-        total_events = total,
-        "updated"
+        chains = targets.len(),
+        concurrency = n,
+        data_dir = %data_dir.display(),
+        "starting sync",
     );
+
+    let data_dir = Arc::new(data_dir.to_path_buf());
+    let opts = Arc::new(opts);
+    let ok = Arc::new(AtomicU32::new(0));
+    let fail = Arc::new(AtomicU32::new(0));
+    let sem = Arc::new(tokio::sync::Semaphore::new(n));
+    let mut set = JoinSet::new();
+
+    for (chain, rpcs) in targets {
+        let (dir, opts, ok, fail, sem) = (
+            Arc::clone(&data_dir),
+            Arc::clone(&opts),
+            Arc::clone(&ok),
+            Arc::clone(&fail),
+            Arc::clone(&sem),
+        );
+        set.spawn(async move {
+            let _permit = sem.acquire().await.expect("semaphore closed");
+            let cid = chain.chain_id();
+            match sync_chain(&chain, &dir, &rpcs, &opts).await {
+                Ok(()) => {
+                    ok.fetch_add(1, Ordering::Relaxed);
+                    tracing::info!(chain_id = cid, "sync complete");
+                }
+                Err(e) => {
+                    fail.fetch_add(1, Ordering::Relaxed);
+                    tracing::error!(chain_id = cid, error = %e, "sync failed");
+                }
+            }
+        });
+    }
+
+    while set.join_next().await.is_some() {}
+
+    let (s, f) = (ok.load(Ordering::Relaxed), fail.load(Ordering::Relaxed));
+    tracing::info!(success = s, failed = f, "sync finished");
+    if f > 0 && s == 0 {
+        bail!("all {f} chain(s) failed to sync");
+    }
+    if f > 0 {
+        tracing::warn!(failed = f, success = s, "some chains failed");
+    }
     Ok(())
 }
 
-/// Synchronize a single chain with automatic RPC fallback.
-///
-/// Tries each RPC in `rpcs` in order. On failure the next endpoint is
-/// attempted — cursor and parquet tracking ensure no data is duplicated.
-///
-/// The data directory layout is:
-/// ```text
-/// <data_dir>/<chain_id>/
-///   ├── cursor.json
-///   ├── identity.parquet
-///   └── reputation.parquet
-/// ```
+/// Synchronise a single chain, trying each RPC in order.
 ///
 /// # Errors
 ///
@@ -203,77 +223,253 @@ async fn sync_contract<P: Provider>(
 /// # Panics
 ///
 /// Panics if `rpcs` is empty.
-pub async fn sync_chain(chain: &ChainConfig, data_dir: &Path, rpcs: &[String]) -> Result<()> {
-    let chain_id = chain.chain_id();
+pub async fn sync_chain(
+    chain: &ChainConfig,
+    data_dir: &Path,
+    rpcs: &[String],
+    opts: &SyncOptions,
+) -> Result<()> {
+    let cid = chain.chain_id();
     let mut last_err = None;
-
-    for (i, rpc_url) in rpcs.iter().enumerate() {
-        match try_sync(chain, data_dir, rpc_url).await {
+    for (i, url) in rpcs.iter().enumerate() {
+        match try_sync(chain, data_dir, url, opts).await {
             Ok(()) => return Ok(()),
             Err(e) => {
                 if i + 1 < rpcs.len() {
-                    tracing::warn!(
-                        chain_id,
-                        rpc = %rpc_url,
-                        next = %rpcs[i + 1],
-                        error = %e,
-                        "RPC failed, falling back"
-                    );
+                    tracing::warn!(chain_id = cid, rpc = %url, next = %rpcs[i + 1], error = %e, "falling back");
                 } else {
-                    tracing::error!(chain_id, rpc = %rpc_url, error = %e, "last RPC failed");
+                    tracing::error!(chain_id = cid, rpc = %url, error = %e, "last RPC failed");
                 }
                 last_err = Some(e);
             }
         }
     }
-
     Err(last_err.expect("rpcs is non-empty"))
 }
 
-/// Attempt a full sync using a single RPC endpoint.
-async fn try_sync(chain: &ChainConfig, data_dir: &Path, rpc_url: &str) -> Result<()> {
-    let chain_id = chain.chain_id();
-    let chain_dir = data_dir.join(chain_id.to_string());
-    std::fs::create_dir_all(&chain_dir)?;
+/// Binds a provider + chain context so that method signatures stay short.
+struct Session<'a, P> {
+    provider: &'a P,
+    chain_id: u64,
+    dir: &'a Path,
+    opts: &'a SyncOptions,
+}
 
-    tracing::info!(chain_id, rpc = rpc_url, "connecting");
+/// Connect to a single RPC and sync both contracts.
+async fn try_sync(
+    chain: &ChainConfig,
+    data_dir: &Path,
+    rpc_url: &str,
+    opts: &SyncOptions,
+) -> Result<()> {
+    let cid = chain.chain_id();
+    let dir = data_dir.join(cid.to_string());
+    std::fs::create_dir_all(&dir)?;
 
+    tracing::info!(chain_id = cid, rpc = rpc_url, "connecting");
     let provider = ProviderBuilder::new().connect_http(
         rpc_url
             .parse()
             .with_context(|| format!("invalid RPC URL: {rpc_url}"))?,
     );
 
-    let latest = tokio::time::timeout(REQUEST_TIMEOUT, provider.get_block_number())
+    let latest = tokio::time::timeout(opts.request_timeout, provider.get_block_number())
         .await
         .context("get_block_number timed out")?
         .context("get_block_number failed")?;
 
-    let start =
-        Cursor::load(&chain_dir)?.map_or_else(|| chain.deployment_block, |c| c.last_block + 1);
+    let start = Cursor::load(&dir)?.map_or_else(|| chain.deployment_block, |c| c.last_block + 1);
 
     if start > latest {
-        tracing::info!(chain_id, latest, "already up to date");
+        tracing::info!(chain_id = cid, latest, "already up to date");
         return Ok(());
     }
 
     tracing::info!(
-        chain_id,
+        chain_id = cid,
         from = start,
         to = latest,
         blocks = latest - start,
         "syncing"
     );
 
+    let s = Session {
+        provider: &provider,
+        chain_id: cid,
+        dir: &dir,
+        opts,
+    };
     let addrs = chain.network.addresses();
     for (addr, name) in [
         (addrs.identity, "identity"),
         (addrs.reputation, "reputation"),
     ] {
-        sync_contract(&provider, addr, name, &chain_dir, start, latest, chain_id).await?;
+        s.sync_contract(addr, name, start, latest).await?;
     }
 
-    Cursor::now(latest).save(&chain_dir)?;
-    tracing::info!(chain_id, last_block = latest, "cursor updated");
+    Cursor::now(latest).save(&dir)?;
+    tracing::info!(chain_id = cid, last_block = latest, "cursor updated");
     Ok(())
+}
+
+impl<P: Provider> Session<'_, P> {
+    /// Sync a single contract: read existing Parquet, fetch new logs, flush.
+    async fn sync_contract(
+        &self,
+        address: Address,
+        name: &str,
+        start: u64,
+        latest: u64,
+    ) -> Result<()> {
+        let path = self.dir.join(format!("{name}.parquet"));
+        let mut batches = parquet::read(&path)?;
+
+        let from = parquet::max_block_number(&batches).map_or(start, |b| b + 1);
+        if from > latest {
+            tracing::info!(
+                chain_id = self.chain_id,
+                contract = name,
+                "already up to date"
+            );
+            return Ok(());
+        }
+
+        tracing::info!(chain_id = self.chain_id, contract = name, %address, from, to = latest, "fetching logs");
+
+        let new = self
+            .fetch_logs(address, &path, &mut batches, from, latest)
+            .await?;
+        if new == 0 {
+            tracing::info!(chain_id = self.chain_id, contract = name, "no new events");
+        } else {
+            let total: usize = batches.iter().map(RecordBatch::num_rows).sum();
+            tracing::info!(
+                chain_id = self.chain_id,
+                contract = name,
+                new_events = new,
+                total_events = total,
+                "updated"
+            );
+        }
+        Ok(())
+    }
+
+    /// Adaptive fetch loop with periodic flushing.
+    async fn fetch_logs(
+        &self,
+        address: Address,
+        path: &Path,
+        batches: &mut Vec<RecordBatch>,
+        from: u64,
+        to: u64,
+    ) -> Result<usize> {
+        let cid = self.chain_id;
+        let mut pending: Vec<Log> = Vec::new();
+        let mut block = from;
+        let mut batcher = Batcher::new();
+        let mut reqs = 0u64;
+        let mut errors = 0u32;
+        let mut total = 0usize;
+
+        while block <= to {
+            let end = (block + batcher.size - 1).min(to);
+            let filter = Filter::new()
+                .address(address)
+                .from_block(block)
+                .to_block(end);
+
+            let res =
+                tokio::time::timeout(self.opts.request_timeout, self.provider.get_logs(&filter))
+                    .await
+                    .map_err(|_| anyhow::anyhow!("request timed out"))
+                    .and_then(|r| r.map_err(|e| anyhow::anyhow!("{e}")));
+
+            match res {
+                Ok(logs) => {
+                    errors = 0;
+                    pending.extend(logs);
+                    batcher.grow();
+                    block = end + 1;
+                    reqs += 1;
+
+                    if pending.len() >= FLUSH_THRESHOLD {
+                        total += flush(&mut pending, path, batches)?;
+                    }
+                    if reqs.is_multiple_of(PROGRESS_INTERVAL) {
+                        #[allow(clippy::cast_precision_loss)]
+                        let pct = if to > from {
+                            (block - from) as f64 / (to - from) as f64 * 100.0
+                        } else {
+                            100.0
+                        };
+                        tracing::info!(
+                            chain_id = cid, reqs, block,
+                            batch_size = batcher.size,
+                            progress = %format_args!("{pct:.0}%"),
+                            "fetching",
+                        );
+                    }
+                    tokio::time::sleep(self.opts.batch_delay).await;
+                }
+                Err(e) => {
+                    let kind = classify_error(&e);
+                    errors += 1;
+
+                    if errors >= self.opts.max_errors {
+                        let _ = flush(&mut pending, path, batches);
+                        bail!("chain {cid}: {errors} consecutive errors at block {block}: {e}");
+                    }
+
+                    match kind {
+                        RpcErrorKind::RangeTooLarge => {
+                            if !batcher.shrink_for_range() {
+                                let _ = flush(&mut pending, path, batches);
+                                bail!("chain {cid}: range error at min batch (block {block}): {e}");
+                            }
+                            tracing::warn!(
+                                chain_id = cid,
+                                block,
+                                batch_size = batcher.size,
+                                "range too large, shrinking"
+                            );
+                            tokio::time::sleep(Duration::from_millis(200)).await;
+                        }
+                        RpcErrorKind::RateLimited => {
+                            let d = backoff_duration(errors);
+                            tracing::warn!(
+                                chain_id = cid,
+                                block,
+                                delay_ms = d.as_millis(),
+                                "rate limited"
+                            );
+                            tokio::time::sleep(d).await;
+                        }
+                        RpcErrorKind::Transient => {
+                            batcher.shrink_transient();
+                            let d = backoff_duration(errors);
+                            tracing::warn!(chain_id = cid, block, batch_size = batcher.size, delay_ms = d.as_millis(), error = %e, "transient error");
+                            tokio::time::sleep(d).await;
+                        }
+                    }
+                }
+            }
+        }
+
+        total += flush(&mut pending, path, batches)?;
+        Ok(total)
+    }
+}
+
+/// Write pending logs to Parquet and clear the buffer.
+fn flush(pending: &mut Vec<Log>, path: &Path, batches: &mut Vec<RecordBatch>) -> Result<usize> {
+    if pending.is_empty() {
+        return Ok(0);
+    }
+    let (batch, n) = parquet::logs_to_batch(pending)?;
+    if n > 0 {
+        batches.push(batch);
+        parquet::write(path, batches)?;
+    }
+    pending.clear();
+    Ok(n)
 }

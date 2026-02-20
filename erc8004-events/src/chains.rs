@@ -35,14 +35,14 @@ pub const ALL: &[ChainConfig] = &[
         network: Network::BaseMainnet,
         name: "Base",
         deployment_block: 41_663_783,
-        default_rpc: "https://mainnet.base.org",
+        default_rpc: "https://base.gateway.tenderly.co",
         is_testnet: false,
     },
     ChainConfig {
         network: Network::EthereumMainnet,
         name: "Ethereum",
         deployment_block: 24_339_871,
-        default_rpc: "https://ethereum-rpc.publicnode.com",
+        default_rpc: "https://0xrpc.io/eth",
         is_testnet: false,
     },
     ChainConfig {
@@ -77,14 +77,14 @@ pub const ALL: &[ChainConfig] = &[
         network: Network::ScrollMainnet,
         name: "Scroll",
         deployment_block: 15_577_120,
-        default_rpc: "https://rpc.scroll.io",
+        default_rpc: "https://scroll-rpc.publicnode.com",
         is_testnet: false,
     },
     ChainConfig {
         network: Network::TaikoMainnet,
         name: "Taiko",
         deployment_block: 871_920,
-        default_rpc: "https://rpc.mainnet.taiko.xyz",
+        default_rpc: "https://taiko-mainnet.gateway.tenderly.co",
         is_testnet: false,
     },
     ChainConfig {
@@ -98,7 +98,7 @@ pub const ALL: &[ChainConfig] = &[
         network: Network::MonadMainnet,
         name: "Monad",
         deployment_block: 56_017_606,
-        default_rpc: "https://rpc.monad.xyz",
+        default_rpc: "https://monad-mainnet.drpc.org",
         is_testnet: false,
     },
     ChainConfig {
@@ -112,7 +112,7 @@ pub const ALL: &[ChainConfig] = &[
         network: Network::AvalancheMainnet,
         name: "Avalanche",
         deployment_block: 77_893_000,
-        default_rpc: "https://api.avax.network/ext/bc/C/rpc",
+        default_rpc: "https://rpc.sentio.xyz/avalanche",
         is_testnet: false,
     },
     ChainConfig {
@@ -133,14 +133,14 @@ pub const ALL: &[ChainConfig] = &[
         network: Network::MegaEthMainnet,
         name: "MegaETH",
         deployment_block: 7_833_805,
-        default_rpc: "https://rpc.megaeth.com",
+        default_rpc: "https://mainnet.megaeth.com/rpc",
         is_testnet: false,
     },
     ChainConfig {
         network: Network::OptimismMainnet,
         name: "Optimism",
         deployment_block: 147_956_461,
-        default_rpc: "https://mainnet.optimism.io",
+        default_rpc: "https://optimism.gateway.tenderly.co",
         is_testnet: false,
     },
     // Testnets

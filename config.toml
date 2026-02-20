@@ -4,24 +4,41 @@
 
 [chains.1]  # Ethereum
 rpcs = [
-    "https://eth-mainnet.public.blastapi.io",
+    "https://0xrpc.io/eth",
     "https://1rpc.io/eth",
+    "https://eth-mainnet.public.blastapi.io",
     "https://eth.drpc.org",
+    "https://mainnet.gateway.tenderly.co",
+    "https://eth.llamarpc.com",
     "https://ethereum-rpc.publicnode.com",
+    "https://ethereum-public.nodies.app",
+    "https://eth.merkle.io",
+    "https://eth1.lava.build",
+    "https://ethereum.rpc.subquery.network/public",
 ]
 
 [chains.10]  # Optimism
 rpcs = [
     "https://optimism.gateway.tenderly.co",
     "https://optimism.drpc.org",
+    "https://rpc.sentio.xyz/optimism",
     "https://1rpc.io/op",
-    "https://mainnet.optimism.io",
     "https://optimism-rpc.publicnode.com",
+    "https://mainnet.optimism.io",
+    "https://optimism-mainnet.gateway.tatum.io",
+    "https://optimism-public.nodies.app",
+    "https://optimism.rpc.subquery.network/public",
 ]
 
 [chains.56]  # BSC
 rpcs = [
+    "https://rpc.sentio.xyz/bsc",
+    "https://public-bsc.nownodes.io",
+    "https://bsc.drpc.org",
+    "https://bnb.api.onfinality.io/public",
     "https://bsc-mainnet.public.blastapi.io",
+    "https://binance.llamarpc.com",
+    "https://bsc-mainnet.gateway.tatum.io",
 ]
 
 [chains.100]  # Gnosis
@@ -30,86 +47,132 @@ rpcs = [
     "https://gnosis-rpc.publicnode.com",
     "https://gnosis.drpc.org",
     "https://1rpc.io/gnosis",
+    "https://gno-mainnet.gateway.tatum.io",
+    "https://gnosis-public.nodies.app",
 ]
 
 [chains.137]  # Polygon
 rpcs = [
+    "https://polygon.lava.build",
+    "https://rpc.sentio.xyz/matic",
     "https://polygon.gateway.tenderly.co",
     "https://polygon.drpc.org",
     "https://1rpc.io/matic",
+    "https://polygon-mainnet.gateway.tatum.io",
+    "https://polygon-public.nodies.app",
 ]
 
 [chains.143]  # Monad
 rpcs = [
+    "https://monad-mainnet.drpc.org",
+    "https://rpc1.monad.xyz",
+    "https://monad-mainnet.api.onfinality.io/public",
+    "https://infra.originstake.com/monad/evm",
+    "https://monad-mainnet-rpc.spidernode.net",
+    "https://monad.rpc.blxrbdn.com",
+    "https://rpc4.monad.xyz",
+    "https://rpc3.monad.xyz",
+    "https://monad-mainnet.gateway.tatum.io",
+    "https://rpc-mainnet.monadinfra.com",
     "https://rpc.monad.xyz",
+    "https://rpc.sentio.xyz/monad-mainnet",
+    "https://rpc2.monad.xyz",
 ]
 
 [chains.2741]  # Abstract
 rpcs = [
     "https://api.mainnet.abs.xyz",
+    "https://abstract.api.onfinality.io/public",
+    "https://abstract-mainnet.gateway.tatum.io",
 ]
 
 [chains.5000]  # Mantle
 rpcs = [
-    "https://mantle-rpc.publicnode.com",
     "https://rpc.mantle.xyz",
+    "https://mantle.api.onfinality.io/public",
     "https://mantle.drpc.org",
     "https://1rpc.io/mantle",
+    "https://mantle-public.nodies.app",
+]
+
+[chains.6342]  # MegaETH
+rpcs = [
+    "https://mainnet.megaeth.com/rpc",
 ]
 
 [chains.8453]  # Base
 rpcs = [
     "https://base.gateway.tenderly.co",
     "https://base-mainnet.public.blastapi.io",
-    "https://mainnet.base.org",
     "https://1rpc.io/base",
+    "https://base.lava.build",
+    "https://mainnet.base.org",
     "https://base.drpc.org",
+    "https://base.llamarpc.com",
+    "https://base-mainnet.gateway.tatum.io",
+    "https://base-public.nodies.app",
+    "https://base.rpc.subquery.network/public",
 ]
 
 [chains.42161]  # Arbitrum
 rpcs = [
-    "https://arb1.arbitrum.io/rpc",
-    "https://arbitrum-one.public.blastapi.io",
     "https://arbitrum-one-rpc.publicnode.com",
-    "https://arbitrum.drpc.org",
+    "https://arbitrum.gateway.tenderly.co",
+    "https://rpc.sentio.xyz/arbitrum-one",
+    "https://arb1.lava.build",
     "https://1rpc.io/arb",
+    "https://arb-one-mainnet.gateway.tatum.io",
+    "https://arbitrum-one-public.nodies.app",
+    "https://arbitrum-one.public.blastapi.io",
+    "https://arbitrum.rpc.subquery.network/public",
 ]
 
 [chains.42220]  # Celo
 rpcs = [
     "https://forno.celo.org",
-    "https://celo-rpc.publicnode.com",
+    "https://celo-json-rpc.stakely.io",
     "https://celo.drpc.org",
     "https://1rpc.io/celo",
+    "https://celo-mainnet.gateway.tatum.io",
 ]
 
 [chains.43114]  # Avalanche
 rpcs = [
+    "https://rpc.sentio.xyz/avalanche",
+    "https://avalanche-mainnet.gateway.tenderly.co",
+    "https://avalanche-c-chain-rpc.publicnode.com",
     "https://avalanche.drpc.org",
     "https://1rpc.io/avax/c",
+    "https://avalanche.api.onfinality.io/public/ext/bc/C/rpc",
+    "https://avalanche-public.nodies.app/ext/bc/C/rpc",
     "https://api.avax.network/ext/bc/C/rpc",
-    "https://avalanche-c-chain-rpc.publicnode.com",
 ]
 
 [chains.59144]  # Linea
 rpcs = [
+    "https://linea-rpc.publicnode.com",
+    "https://rpc.sentio.xyz/linea",
     "https://rpc.linea.build",
     "https://linea.drpc.org",
-    "https://linea-rpc.publicnode.com",
     "https://1rpc.io/linea",
 ]
 
 [chains.167000]  # Taiko
 rpcs = [
+    "https://taiko-mainnet.gateway.tenderly.co",
+    "https://rpc.taiko.xyz",
     "https://rpc.mainnet.taiko.xyz",
     "https://taiko-rpc.publicnode.com",
+    "https://taiko-json-rpc.stakely.io",
     "https://taiko.drpc.org",
 ]
 
 [chains.534352]  # Scroll
 rpcs = [
     "https://scroll-rpc.publicnode.com",
-    "https://rpc.scroll.io",
+    "https://scroll.api.onfinality.io/public",
     "https://scroll.drpc.org",
+    "https://rpc.scroll.io",
+    "https://scroll-public.nodies.app",
     "https://1rpc.io/scroll",
 ]
