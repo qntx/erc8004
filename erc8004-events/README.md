@@ -47,6 +47,56 @@ Fetches all event logs from the **Identity Registry** and **Reputation Registry*
 | MegaETH Testnet | 6342 | testnet |
 | Optimism Sepolia | 11155420 | testnet |
 
+## Contract Addresses
+
+All ERC-8004 contracts are deployed via **CREATE2** — mainnet chains share the same pair of addresses, and testnet chains share a different pair.
+
+### Mainnet Contracts
+
+- **Identity Registry:** `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`
+- **Reputation Registry:** `0x8004BAa17C55a88189AE136b182e5fdA19dE9b63`
+
+| Network | Chain ID | Identity Registry | Reputation Registry |
+| --- | ---: | --- | --- |
+| Ethereum | 1 | [etherscan](https://etherscan.io/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [etherscan](https://etherscan.io/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+| Optimism | 10 | [etherscan](https://optimistic.etherscan.io/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [etherscan](https://optimistic.etherscan.io/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+| BNB Smart Chain | 56 | [bscscan](https://bscscan.com/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [bscscan](https://bscscan.com/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+| Gnosis | 100 | [gnosisscan](https://gnosisscan.io/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [gnosisscan](https://gnosisscan.io/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+| Polygon | 137 | [polygonscan](https://polygonscan.com/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [polygonscan](https://polygonscan.com/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+| Monad | 143 | [monadexplorer](https://monadexplorer.com/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [monadexplorer](https://monadexplorer.com/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+| Abstract | 2741 | [abscan](https://abscan.org/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [abscan](https://abscan.org/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+| MegaETH | 4326 | [megaexplorer](https://megaexplorer.xyz/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [megaexplorer](https://megaexplorer.xyz/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+| Mantle | 5000 | [mantlescan](https://mantlescan.xyz/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [mantlescan](https://mantlescan.xyz/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+| Base | 8453 | [basescan](https://basescan.org/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [basescan](https://basescan.org/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+| Arbitrum One | 42161 | [arbiscan](https://arbiscan.io/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [arbiscan](https://arbiscan.io/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+| Celo | 42220 | [celoscan](https://celoscan.io/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [celoscan](https://celoscan.io/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+| Avalanche | 43114 | [snowtrace](https://snowtrace.io/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [snowtrace](https://snowtrace.io/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+| Linea | 59144 | [lineascan](https://lineascan.build/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [lineascan](https://lineascan.build/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+| Taiko | 167000 | [taikoscan](https://taikoscan.io/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [taikoscan](https://taikoscan.io/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+| Scroll | 534352 | [scrollscan](https://scrollscan.com/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [scrollscan](https://scrollscan.com/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
+
+### Testnet Contracts
+
+- **Identity Registry:** `0x8004A818BFB912233c491871b3d84c89A494BD9e`
+- **Reputation Registry:** `0x8004B663056A597Dffe9eCcC1965A193B7388713`
+
+| Network | Chain ID | Identity Registry | Reputation Registry |
+| --- | ---: | --- | --- |
+| BNB Testnet | 97 | [bscscan](https://testnet.bscscan.com/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) | [bscscan](https://testnet.bscscan.com/address/0x8004B663056A597Dffe9eCcC1965A193B7388713) |
+| MegaETH Testnet | 6342 | [megaexplorer](https://testnet.megaexplorer.xyz/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) | [megaexplorer](https://testnet.megaexplorer.xyz/address/0x8004B663056A597Dffe9eCcC1965A193B7388713) |
+| Mantle Sepolia | 5003 | [mantlescan](https://sepolia.mantlescan.xyz/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) | [mantlescan](https://sepolia.mantlescan.xyz/address/0x8004B663056A597Dffe9eCcC1965A193B7388713) |
+| Monad Testnet | 10143 | [monadexplorer](https://testnet.monadexplorer.com/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) | [monadexplorer](https://testnet.monadexplorer.com/address/0x8004B663056A597Dffe9eCcC1965A193B7388713) |
+| Celo Alfajores | 44787 | [celoscan](https://alfajores.celoscan.io/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) | [celoscan](https://alfajores.celoscan.io/address/0x8004B663056A597Dffe9eCcC1965A193B7388713) |
+| Polygon Amoy | 80002 | [polygonscan](https://amoy.polygonscan.com/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) | [polygonscan](https://amoy.polygonscan.com/address/0x8004B663056A597Dffe9eCcC1965A193B7388713) |
+| Base Sepolia | 84532 | [basescan](https://sepolia.basescan.org/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) | [basescan](https://sepolia.basescan.org/address/0x8004B663056A597Dffe9eCcC1965A193B7388713) |
+| Arbitrum Sepolia | 421614 | [arbiscan](https://sepolia.arbiscan.io/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) | [arbiscan](https://sepolia.arbiscan.io/address/0x8004B663056A597Dffe9eCcC1965A193B7388713) |
+| Linea Sepolia | 59141 | [lineascan](https://sepolia.lineascan.build/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) | [lineascan](https://sepolia.lineascan.build/address/0x8004B663056A597Dffe9eCcC1965A193B7388713) |
+| Scroll Sepolia | 534351 | [scrollscan](https://sepolia.scrollscan.com/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) | [scrollscan](https://sepolia.scrollscan.com/address/0x8004B663056A597Dffe9eCcC1965A193B7388713) |
+| Ethereum Sepolia | 11155111 | [etherscan](https://sepolia.etherscan.io/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) | [etherscan](https://sepolia.etherscan.io/address/0x8004B663056A597Dffe9eCcC1965A193B7388713) |
+| Optimism Sepolia | 11155420 | [etherscan](https://sepolia-optimistic.etherscan.io/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) | [etherscan](https://sepolia-optimistic.etherscan.io/address/0x8004B663056A597Dffe9eCcC1965A193B7388713) |
+
+> **Tip:** Click any link above and look for **"Contract Creator"** to find the exact deployment transaction and block number.
+
 ## Data Format
 
 Each chain produces two Parquet files under `data/<chain_id>/`:
