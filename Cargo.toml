@@ -16,7 +16,7 @@ erc8004-events = { version = "0.3", path = "erc8004-events" }
 
 alloy = { version = "1", features = ["full"] }
 anyhow = "1"
-arrow-array = "57"
+arrow-array = "58"
 arrow-schema = "57"
 chrono = { version = "0.4", features = ["serde"] }
 clap = { version = "4", features = ["derive"] }
