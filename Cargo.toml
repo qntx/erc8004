@@ -20,7 +20,7 @@ arrow-array = "57"
 arrow-schema = "57"
 chrono = { version = "0.4", features = ["serde"] }
 clap = { version = "4", features = ["derive"] }
-parquet = { version = "57", features = ["arrow"] }
+parquet = { version = "58", features = ["arrow"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"
