@@ -4,7 +4,24 @@
 //! specification (agent registration files, feedback files, etc.) and provide
 //! ergonomic wrappers around on-chain primitives.
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
+
+/// Deserialize a `u64` from either a JSON number or a JSON string.
+fn deserialize_u64_or_string<'de, D>(deserializer: D) -> Result<u64, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum StringOrNum {
+        Num(u64),
+        Str(String),
+    }
+    match StringOrNum::deserialize(deserializer)? {
+        StringOrNum::Num(n) => Ok(n),
+        StringOrNum::Str(s) => s.parse::<u64>().map_err(serde::de::Error::custom),
+    }
+}
 
 /// The top-level agent registration file resolved by `agentURI`.
 ///
@@ -80,7 +97,7 @@ pub struct ServiceEndpoint {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Registration {
     /// The ERC-721 token ID on the target chain.
-    #[serde(rename = "agentId")]
+    #[serde(rename = "agentId", deserialize_with = "deserialize_u64_or_string")]
     pub agent_id: u64,
 
     /// A colon-separated string `{namespace}:{chainId}:{identityRegistry}`.

@@ -255,6 +255,9 @@ struct Session<'a, P> {
     opts: &'a SyncOptions,
 }
 
+/// Number of blocks to probe near the deployment block for the archive check.
+const ARCHIVE_PROBE_RANGE: u64 = 500;
+
 /// Connect to a single RPC and sync both contracts.
 async fn try_sync(
     chain: &ChainConfig,
@@ -285,6 +288,16 @@ async fn try_sync(
         return Ok(());
     }
 
+    // Archive probe: when syncing from the deployment block (i.e. no cursor
+    // yet or cursor is very close to deployment), verify that the RPC actually
+    // returns historical logs.  Some free RPCs silently return empty results
+    // for old block ranges, which causes the sync to skip all early events.
+    let needs_history = start <= chain.deployment_block + ARCHIVE_PROBE_RANGE;
+    if needs_history {
+        let addrs = chain.network.addresses();
+        probe_archive(&provider, cid, addrs.identity, chain.deployment_block, opts).await?;
+    }
+
     tracing::info!(
         chain_id = cid,
         from = start,
@@ -309,6 +322,52 @@ async fn try_sync(
 
     Cursor::now(latest).save(&dir)?;
     tracing::info!(chain_id = cid, last_block = latest, "cursor updated");
+    Ok(())
+}
+
+/// Probe the RPC for historical log availability near the deployment block.
+///
+/// Queries a small block range right after the deployment block.  If the RPC
+/// returns zero logs, it likely does not serve historical data (some free RPCs
+/// silently return empty arrays instead of an error).  In that case we bail
+/// so that [`sync_chain`] can fall back to the next RPC endpoint.
+async fn probe_archive(
+    provider: &impl Provider,
+    chain_id: u64,
+    address: Address,
+    deployment_block: u64,
+    opts: &SyncOptions,
+) -> Result<()> {
+    let end = deployment_block + ARCHIVE_PROBE_RANGE;
+    let filter = Filter::new()
+        .address(address)
+        .from_block(deployment_block)
+        .to_block(end);
+
+    let logs = tokio::time::timeout(opts.request_timeout, provider.get_logs(&filter))
+        .await
+        .map_err(|_| anyhow::anyhow!("archive probe timed out"))
+        .and_then(|r| r.map_err(|e| anyhow::anyhow!("archive probe failed: {e}")))?;
+
+    if logs.is_empty() {
+        tracing::warn!(
+            chain_id,
+            deployment_block,
+            probe_end = end,
+            "archive probe returned 0 logs — RPC may not serve historical data, skipping"
+        );
+        bail!(
+            "chain {chain_id}: archive probe returned 0 logs for blocks {deployment_block}..{end}; \
+             RPC likely does not have historical log data"
+        );
+    }
+
+    tracing::info!(
+        chain_id,
+        deployment_block,
+        probe_logs = logs.len(),
+        "archive probe OK"
+    );
     Ok(())
 }
 
