@@ -1,4 +1,10 @@
-# erc8004
+<!-- markdownlint-disable MD033 MD041 MD036 -->
+
+<div align="center">
+
+# ERC-8004
+
+**The Trust Layer for AI Agents**
 
 [![CI][ci-badge]][ci-url]
 [![crates.io][crate-badge]][crate-url]
@@ -20,11 +26,16 @@
 [hf-badge]: https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-erc8004--events-yellow.svg
 [hf-url]: https://huggingface.co/datasets/qntx/erc8004-events
 
-**Type-safe Rust SDK for the [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) Trustless Agents standard — on-chain identity, reputation, and validation registries for AI agents.**
+Type-safe Rust SDK for the [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) Trustless Agents standard.
+On-chain identity, reputation, and validation registries for AI agents.
+
+[Quick Start](#quick-start) | [Architecture](#architecture) | [API docs][doc-url]
+
+</div>
+
+## Overview
 
 ERC-8004 enables **discovery, reputation, and validation** of AI agents across organizational boundaries without pre-existing trust. This SDK provides ergonomic, alloy-native bindings for all three registries, with 30 pre-configured network deployments (CREATE2 deterministic addresses) and full off-chain type support (registration files, service endpoints, feedback).
-
-See [Security](SECURITY.md) before using in production.
 
 ## Quick Start
 
