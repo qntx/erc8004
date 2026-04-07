@@ -146,7 +146,7 @@ impl<P: Provider> Reputation<P> {
     pub async fn read_all_feedback(
         &self,
         agent_id: U256,
-        client_addresses: Vec<Address>,
+        client_addresses: &[Address],
         tag1: &str,
         tag2: &str,
         include_revoked: bool,
@@ -155,7 +155,7 @@ impl<P: Provider> Reputation<P> {
         Ok(contract
             .readAllFeedback(
                 agent_id,
-                client_addresses,
+                client_addresses.to_vec(),
                 tag1.to_owned(),
                 tag2.to_owned(),
                 include_revoked,
@@ -175,13 +175,18 @@ impl<P: Provider> Reputation<P> {
     pub async fn get_summary(
         &self,
         agent_id: U256,
-        client_addresses: Vec<Address>,
+        client_addresses: &[Address],
         tag1: &str,
         tag2: &str,
     ) -> Result<ReputationSummary> {
         let contract = ReputationRegistry::new(self.address, &self.provider);
         let r = contract
-            .getSummary(agent_id, client_addresses, tag1.to_owned(), tag2.to_owned())
+            .getSummary(
+                agent_id,
+                client_addresses.to_vec(),
+                tag1.to_owned(),
+                tag2.to_owned(),
+            )
             .call()
             .await?;
         Ok(ReputationSummary {
@@ -224,11 +229,16 @@ impl<P: Provider> Reputation<P> {
         agent_id: U256,
         client_address: Address,
         feedback_index: u64,
-        responders: Vec<Address>,
+        responders: &[Address],
     ) -> Result<u64> {
         let contract = ReputationRegistry::new(self.address, &self.provider);
         Ok(contract
-            .getResponseCount(agent_id, client_address, feedback_index, responders)
+            .getResponseCount(
+                agent_id,
+                client_address,
+                feedback_index,
+                responders.to_vec(),
+            )
             .call()
             .await?)
     }

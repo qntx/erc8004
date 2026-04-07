@@ -218,3 +218,75 @@ impl Network {
         format!("eip155:{}:{}", self.chain_id(), self.addresses().identity)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_all_has_no_duplicate_chain_ids() {
+        let mut ids: Vec<u64> = Network::ALL.iter().map(|n| n.chain_id()).collect();
+        ids.sort_unstable();
+        let before = ids.len();
+        ids.dedup();
+        assert_eq!(
+            before,
+            ids.len(),
+            "Network::ALL contains duplicate chain IDs"
+        );
+    }
+
+    #[test]
+    fn test_chain_id_round_trip() {
+        for &network in Network::ALL {
+            let id = network.chain_id();
+            assert_eq!(
+                Network::from_chain_id(id),
+                Some(network),
+                "from_chain_id({id}) should return the original variant"
+            );
+        }
+    }
+
+    #[test]
+    fn test_from_chain_id_unknown_returns_none() {
+        assert_eq!(Network::from_chain_id(999_999_999), None);
+    }
+
+    #[test]
+    fn test_create2_mainnet_addresses_are_consistent() {
+        let reference = Network::EthereumMainnet.addresses();
+        for &network in Network::ALL {
+            let addrs = network.addresses();
+            if addrs.identity != reference.identity {
+                continue;
+            }
+            assert_eq!(
+                addrs.reputation,
+                reference.reputation,
+                "chain {} has matching identity but mismatched reputation",
+                network.chain_id()
+            );
+        }
+    }
+
+    #[test]
+    fn test_testnet_addresses_differ_from_mainnet() {
+        let mainnet = Network::EthereumMainnet.addresses();
+        let testnet = Network::EthereumSepolia.addresses();
+        assert_ne!(mainnet.identity, testnet.identity);
+        assert_ne!(mainnet.reputation, testnet.reputation);
+    }
+
+    #[test]
+    fn test_agent_registry_prefix_format() {
+        let network = Network::EthereumMainnet;
+        let prefix = network.agent_registry_prefix();
+        let expected = format!(
+            "eip155:{}:{}",
+            network.chain_id(),
+            network.addresses().identity
+        );
+        assert_eq!(prefix, expected);
+    }
+}

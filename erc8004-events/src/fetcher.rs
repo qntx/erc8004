@@ -84,8 +84,6 @@ impl Batcher {
     }
 }
 
-// ── Error classification ─────────────────────────────────────────────
-
 /// Broad classification of RPC errors.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum RpcErrorKind {

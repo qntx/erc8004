@@ -187,3 +187,76 @@ impl<P: Provider> Erc8004<P> {
         self.validation_address
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use alloy::primitives::address;
+    use alloy::providers::ProviderBuilder;
+
+    use super::*;
+    use crate::networks::Network;
+
+    fn test_client() -> Erc8004<impl Provider> {
+        let provider = ProviderBuilder::new().connect_http("https://localhost:1".parse().unwrap());
+        Erc8004::new(provider)
+    }
+
+    #[test]
+    fn test_new_has_no_addresses() {
+        let client = test_client();
+        assert!(client.identity_address().is_none());
+        assert!(client.reputation_address().is_none());
+        assert!(client.validation_address().is_none());
+    }
+
+    #[test]
+    fn test_with_network_configures_handles() {
+        let client = test_client().with_network(Network::EthereumMainnet);
+        let addrs = Network::EthereumMainnet.addresses();
+        assert_eq!(client.identity_address(), Some(addrs.identity));
+        assert_eq!(client.reputation_address(), Some(addrs.reputation));
+        assert!(client.identity().is_ok());
+        assert!(client.reputation().is_ok());
+    }
+
+    #[test]
+    fn test_with_individual_addresses_stored_independently() {
+        let id = address!("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        let rep = address!("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+        let val = address!("cccccccccccccccccccccccccccccccccccccccc");
+        let client = test_client()
+            .with_identity_address(id)
+            .with_reputation_address(rep)
+            .with_validation_address(val);
+        assert_eq!(client.identity_address(), Some(id));
+        assert_eq!(client.reputation_address(), Some(rep));
+        assert_eq!(client.validation_address(), Some(val));
+    }
+
+    #[test]
+    fn test_unconfigured_registries_return_error() {
+        let client = test_client();
+        for (label, result) in [
+            ("identity", client.identity().err()),
+            ("reputation", client.reputation().err()),
+            ("validation", client.validation().err()),
+        ] {
+            let msg = result.map_or_else(|| unreachable!("{label} should fail"), |e| e.to_string());
+            assert!(
+                msg.contains("not configured"),
+                "{label}: expected 'not configured', got: {msg}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_with_addresses_struct() {
+        let addrs = NetworkAddresses {
+            identity: address!("1111111111111111111111111111111111111111"),
+            reputation: address!("2222222222222222222222222222222222222222"),
+        };
+        let client = test_client().with_addresses(addrs);
+        assert_eq!(client.identity_address(), Some(addrs.identity));
+        assert_eq!(client.reputation_address(), Some(addrs.reputation));
+    }
+}

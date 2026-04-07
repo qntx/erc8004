@@ -45,6 +45,10 @@ pub enum Erc8004Error {
         source: alloy::hex::FromHexError,
     },
 
+    /// A registration transaction succeeded but emitted no `Registered` event.
+    #[error("transaction receipt contained no Registered event")]
+    MissingRegisteredEvent,
+
     /// The identity registry address returned by Reputation/Validation
     /// does not match the configured identity registry.
     #[error("identity registry mismatch: expected {expected}, got {actual}")]
@@ -58,3 +62,50 @@ pub enum Erc8004Error {
 
 /// A convenience type alias used throughout the SDK.
 pub type Result<T> = core::result::Result<T, Erc8004Error>;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_registry_not_configured_display() {
+        let err = Erc8004Error::RegistryNotConfigured {
+            registry: "identity",
+        };
+        assert_eq!(err.to_string(), "registry not configured: identity");
+    }
+
+    #[test]
+    fn test_agent_not_found_display() {
+        let err = Erc8004Error::AgentNotFound {
+            agent_id: alloy::primitives::U256::from(42),
+        };
+        assert_eq!(err.to_string(), "agent 42 does not exist");
+    }
+
+    #[test]
+    fn test_missing_registered_event_display() {
+        let err = Erc8004Error::MissingRegisteredEvent;
+        assert_eq!(
+            err.to_string(),
+            "transaction receipt contained no Registered event"
+        );
+    }
+
+    #[test]
+    fn test_identity_registry_mismatch_display() {
+        let expected = Address::ZERO;
+        let actual = Address::repeat_byte(0x01);
+        let err = Erc8004Error::IdentityRegistryMismatch { expected, actual };
+        assert_eq!(
+            err.to_string(),
+            format!("identity registry mismatch: expected {expected}, got {actual}")
+        );
+    }
+
+    #[test]
+    fn test_error_is_send_sync() {
+        fn assert_send_sync<T: Send + Sync>() {}
+        assert_send_sync::<Erc8004Error>();
+    }
+}

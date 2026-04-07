@@ -144,12 +144,12 @@ impl<P: Provider> Validation<P> {
     pub async fn get_summary(
         &self,
         agent_id: U256,
-        validator_addresses: Vec<Address>,
+        validator_addresses: &[Address],
         tag: &str,
     ) -> Result<ValidationSummary> {
         let contract = ValidationRegistry::new(self.address, &self.provider);
         let r = contract
-            .getSummary(agent_id, validator_addresses, tag.to_owned())
+            .getSummary(agent_id, validator_addresses.to_vec(), tag.to_owned())
             .call()
             .await?;
         Ok(ValidationSummary {

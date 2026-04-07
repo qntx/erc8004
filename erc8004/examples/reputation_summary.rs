@@ -37,9 +37,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // Get the aggregated summary (filtering by known clients to avoid Sybil).
-    let summary = reputation
-        .get_summary(agent_id, clients.clone(), "", "")
-        .await?;
+    let summary = reputation.get_summary(agent_id, &clients, "", "").await?;
 
     println!(
         "Summary: count={}, value={} (decimals={})",

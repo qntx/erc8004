@@ -267,10 +267,6 @@ impl<P: Provider> Identity<P> {
                     .ok()
                     .map(|e| e.inner.data.agentId)
             })
-            .ok_or(Erc8004Error::Contract(
-                alloy::contract::Error::UnknownFunction(
-                    "register: no Registered event found".to_owned(),
-                ),
-            ))
+            .ok_or(Erc8004Error::MissingRegisteredEvent)
     }
 }
