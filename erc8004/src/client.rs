@@ -19,7 +19,7 @@
 use alloy::{primitives::Address, providers::Provider};
 
 use crate::{
-    error::{Error, Result},
+    error::{Erc8004Error, Result},
     identity::Identity,
     networks::{Network, NetworkAddresses},
     reputation::Reputation,
@@ -116,12 +116,14 @@ impl<P: Provider> Erc8004<P> {
     ///
     /// # Errors
     ///
-    /// Returns [`Error::RegistryNotConfigured`] if the identity address
+    /// Returns [`Erc8004Error::RegistryNotConfigured`] if the identity address
     /// has not been set.
     pub fn identity(&self) -> Result<Identity<&P>> {
-        let address = self.identity_address.ok_or(Error::RegistryNotConfigured {
-            registry: "identity",
-        })?;
+        let address = self
+            .identity_address
+            .ok_or(Erc8004Error::RegistryNotConfigured {
+                registry: "identity",
+            })?;
         Ok(Identity::new(&self.provider, address))
     }
 
@@ -129,12 +131,12 @@ impl<P: Provider> Erc8004<P> {
     ///
     /// # Errors
     ///
-    /// Returns [`Error::RegistryNotConfigured`] if the reputation address
+    /// Returns [`Erc8004Error::RegistryNotConfigured`] if the reputation address
     /// has not been set.
     pub fn reputation(&self) -> Result<Reputation<&P>> {
         let address = self
             .reputation_address
-            .ok_or(Error::RegistryNotConfigured {
+            .ok_or(Erc8004Error::RegistryNotConfigured {
                 registry: "reputation",
             })?;
         Ok(Reputation::new(&self.provider, address))
@@ -144,12 +146,12 @@ impl<P: Provider> Erc8004<P> {
     ///
     /// # Errors
     ///
-    /// Returns [`Error::RegistryNotConfigured`] if the validation address
+    /// Returns [`Erc8004Error::RegistryNotConfigured`] if the validation address
     /// has not been set.
     pub fn validation(&self) -> Result<Validation<&P>> {
         let address = self
             .validation_address
-            .ok_or(Error::RegistryNotConfigured {
+            .ok_or(Erc8004Error::RegistryNotConfigured {
                 registry: "validation",
             })?;
         Ok(Validation::new(&self.provider, address))

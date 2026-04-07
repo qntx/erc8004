@@ -15,7 +15,6 @@ sol! {
     ///
     /// Deployed on Ethereum, Base, Polygon, Arbitrum, Celo mainnet at
     /// `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`.
-    #[allow(missing_docs)]
     #[sol(rpc)]
     contract IdentityRegistry {
         struct MetadataEntry {
@@ -72,7 +71,7 @@ sol! {
     ///
     /// Deployed on Ethereum, Base, Polygon, Arbitrum, Celo mainnet at
     /// `0x8004BAa17C55a88189AE136b182e5fdA19dE9b63`.
-    #[allow(missing_docs, clippy::too_many_arguments)]
+    #[allow(clippy::too_many_arguments, reason = "sol! macro mirrors on-chain ABI")]
     #[sol(rpc)]
     contract ReputationRegistry {
         event NewFeedback(uint256 indexed agentId, address indexed clientAddress, uint64 feedbackIndex, int128 value, uint8 valueDecimals, string indexed indexedTag1, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash);
@@ -101,7 +100,6 @@ sol! {
     ///
     /// **Note:** The official deployment address has not yet been listed in the
     /// ERC-8004 contracts README.
-    #[allow(missing_docs)]
     #[sol(rpc)]
     contract ValidationRegistry {
         event ValidationRequest(address indexed validatorAddress, uint256 indexed agentId, string requestURI, bytes32 indexed requestHash);

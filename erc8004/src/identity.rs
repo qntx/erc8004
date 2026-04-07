@@ -14,7 +14,7 @@ use alloy::{
 
 use crate::{
     contracts::IdentityRegistry,
-    error::{Error, Result},
+    error::{Erc8004Error, Result},
 };
 
 /// A handle to the Identity Registry contract bound to a specific provider.
@@ -267,8 +267,10 @@ impl<P: Provider> Identity<P> {
                     .ok()
                     .map(|e| e.inner.data.agentId)
             })
-            .ok_or(Error::Contract(alloy::contract::Error::UnknownFunction(
-                "register: no Registered event found".to_owned(),
-            )))
+            .ok_or(Erc8004Error::Contract(
+                alloy::contract::Error::UnknownFunction(
+                    "register: no Registered event found".to_owned(),
+                ),
+            ))
     }
 }

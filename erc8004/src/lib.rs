@@ -54,5 +54,7 @@ pub mod validation;
 
 // Re-export primary public API at crate root.
 pub use client::Erc8004;
-pub use error::{Error, Result};
+pub use error::{Erc8004Error, Result};
 pub use networks::Network;
+#[cfg(test)]
+use tokio as _;

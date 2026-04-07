@@ -8,3 +8,6 @@ pub mod config;
 pub mod cursor;
 pub mod fetcher;
 pub mod parquet;
+
+use clap as _;
+use tracing_subscriber as _;

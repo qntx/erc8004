@@ -1,4 +1,7 @@
-#![allow(clippy::print_stdout)]
+#![expect(
+    clippy::print_stdout,
+    reason = "example demonstrates output via stdout"
+)]
 //! Register a new AI agent on-chain via the ERC-8004 Identity Registry.
 //!
 //! Usage:
@@ -11,6 +14,9 @@ use alloy::{
     network::EthereumWallet, providers::ProviderBuilder, signers::local::PrivateKeySigner,
 };
 use erc8004::{Erc8004, Network};
+use serde as _;
+use serde_json as _;
+use thiserror as _;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

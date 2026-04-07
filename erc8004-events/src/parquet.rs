@@ -70,7 +70,10 @@ pub fn logs_to_batch(logs: &[Log]) -> Result<(RecordBatch, usize)> {
 
         block_numbers.push(bn);
         tx_hashes.push(format!("{th:#x}"));
-        #[allow(clippy::cast_possible_truncation)]
+        #[expect(
+            clippy::cast_possible_truncation,
+            reason = "tx/log indices always fit in u32"
+        )]
         {
             tx_indices.push(ti as u32);
             log_indices.push(li as u32);

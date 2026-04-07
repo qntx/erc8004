@@ -105,6 +105,35 @@ pub struct Registration {
     pub agent_registry: String,
 }
 
+/// Input parameters for submitting feedback via
+/// [`Reputation::give_feedback`](crate::reputation::Reputation::give_feedback).
+#[derive(Debug, Clone)]
+pub struct FeedbackInput {
+    /// The target agent's on-chain ID.
+    pub agent_id: alloy::primitives::U256,
+
+    /// Signed feedback value (e.g. a score).
+    pub value: i128,
+
+    /// Number of decimal places for `value`.
+    pub value_decimals: u8,
+
+    /// Primary categorization tag (e.g. `"a2a.task"`).
+    pub tag1: String,
+
+    /// Secondary categorization tag.
+    pub tag2: String,
+
+    /// The endpoint this feedback relates to.
+    pub endpoint: String,
+
+    /// URI pointing to off-chain feedback details.
+    pub feedback_uri: String,
+
+    /// Keccak-256 hash of the feedback URI content.
+    pub feedback_hash: alloy::primitives::FixedBytes<32>,
+}
+
 /// A single feedback entry as returned by `readFeedback`.
 #[derive(Debug, Clone)]
 pub struct Feedback {

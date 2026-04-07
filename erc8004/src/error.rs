@@ -4,7 +4,7 @@ use alloy::primitives::Address;
 
 /// The primary error type for all ERC-8004 SDK operations.
 #[derive(Debug, thiserror::Error)]
-pub enum Error {
+pub enum Erc8004Error {
     /// A contract interaction failed.
     #[error("contract error: {0}")]
     Contract(#[from] alloy::contract::Error),
@@ -57,4 +57,4 @@ pub enum Error {
 }
 
 /// A convenience type alias used throughout the SDK.
-pub type Result<T> = core::result::Result<T, Error>;
+pub type Result<T> = core::result::Result<T, Erc8004Error>;

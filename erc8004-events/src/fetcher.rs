@@ -186,7 +186,9 @@ pub async fn sync_all(
             Arc::clone(&sem),
         );
         set.spawn(async move {
-            let _permit = sem.acquire().await.expect("semaphore closed");
+            let Ok(_permit) = sem.acquire().await else {
+                return;
+            };
             let cid = chain.chain_id();
             match sync_chain(&chain, &dir, &rpcs, &opts).await {
                 Ok(()) => {
@@ -235,8 +237,8 @@ pub async fn sync_chain(
         match try_sync(chain, data_dir, url, opts).await {
             Ok(()) => return Ok(()),
             Err(e) => {
-                if i + 1 < rpcs.len() {
-                    tracing::warn!(chain_id = cid, rpc = %url, next = %rpcs[i + 1], error = %e, "falling back");
+                if let Some(next) = rpcs.get(i + 1) {
+                    tracing::warn!(chain_id = cid, rpc = %url, next = %next, error = %e, "falling back");
                 } else {
                     tracing::error!(chain_id = cid, rpc = %url, error = %e, "last RPC failed");
                 }
@@ -244,7 +246,10 @@ pub async fn sync_chain(
             }
         }
     }
-    Err(last_err.expect("rpcs is non-empty"))
+    match last_err {
+        Some(e) => Err(e),
+        None => bail!("no RPCs configured for chain {cid}"),
+    }
 }
 
 /// Binds a provider + chain context so that method signatures stay short.
@@ -443,79 +448,109 @@ impl<P: Provider> Session<'_, P> {
                     .map_err(|_| anyhow::anyhow!("request timed out"))
                     .and_then(|r| r.map_err(|e| anyhow::anyhow!("{e}")));
 
-            match res {
-                Ok(logs) => {
-                    errors = 0;
-                    pending.extend(logs);
-                    batcher.grow();
-                    block = end + 1;
-                    reqs += 1;
-
-                    if pending.len() >= FLUSH_THRESHOLD {
-                        total += flush(&mut pending, path, batches)?;
-                    }
-                    if reqs.is_multiple_of(PROGRESS_INTERVAL) {
-                        #[allow(clippy::cast_precision_loss)]
-                        let pct = if to > from {
-                            (block - from) as f64 / (to - from) as f64 * 100.0
-                        } else {
-                            100.0
-                        };
-                        tracing::info!(
-                            chain_id = cid, reqs, block,
-                            batch_size = batcher.size,
-                            progress = %format_args!("{pct:.0}%"),
-                            "fetching",
-                        );
-                    }
-                    tokio::time::sleep(self.opts.batch_delay).await;
-                }
+            let logs = match res {
+                Ok(logs) => logs,
                 Err(e) => {
-                    let kind = classify_error(&e);
                     errors += 1;
-
-                    if errors >= self.opts.max_errors {
-                        let _ = flush(&mut pending, path, batches);
-                        bail!("chain {cid}: {errors} consecutive errors at block {block}: {e}");
-                    }
-
-                    match kind {
-                        RpcErrorKind::RangeTooLarge => {
-                            if !batcher.shrink_for_range() {
-                                let _ = flush(&mut pending, path, batches);
-                                bail!("chain {cid}: range error at min batch (block {block}): {e}");
-                            }
-                            tracing::warn!(
-                                chain_id = cid,
-                                block,
-                                batch_size = batcher.size,
-                                "range too large, shrinking"
-                            );
-                            tokio::time::sleep(Duration::from_millis(200)).await;
-                        }
-                        RpcErrorKind::RateLimited => {
-                            let d = backoff_duration(errors);
-                            tracing::warn!(
-                                chain_id = cid,
-                                block,
-                                delay_ms = d.as_millis(),
-                                "rate limited"
-                            );
-                            tokio::time::sleep(d).await;
-                        }
-                        RpcErrorKind::Transient => {
-                            batcher.shrink_transient();
-                            let d = backoff_duration(errors);
-                            tracing::warn!(chain_id = cid, block, batch_size = batcher.size, delay_ms = d.as_millis(), error = %e, "transient error");
-                            tokio::time::sleep(d).await;
-                        }
-                    }
+                    let delay = self
+                        .on_fetch_error(&e, errors, block, &mut batcher)
+                        .inspect_err(|_| best_effort_flush(&mut pending, path, batches))?;
+                    tokio::time::sleep(delay).await;
+                    continue;
                 }
+            };
+
+            errors = 0;
+            pending.extend(logs);
+            batcher.grow();
+            block = end + 1;
+            reqs += 1;
+
+            if pending.len() >= FLUSH_THRESHOLD {
+                total += flush(&mut pending, path, batches)?;
             }
+            if reqs.is_multiple_of(PROGRESS_INTERVAL) {
+                Self::log_progress(cid, block, from, to, reqs, &batcher);
+            }
+            tokio::time::sleep(self.opts.batch_delay).await;
         }
 
         total += flush(&mut pending, path, batches)?;
         Ok(total)
+    }
+
+    /// Handle an RPC error during `fetch_logs`, returning the delay before
+    /// the next retry. Bails if the error is fatal (caller must flush).
+    fn on_fetch_error(
+        &self,
+        e: &anyhow::Error,
+        errors: u32,
+        block: u64,
+        batcher: &mut Batcher,
+    ) -> Result<Duration> {
+        let cid = self.chain_id;
+        let kind = classify_error(e);
+
+        if errors >= self.opts.max_errors {
+            bail!("chain {cid}: {errors} consecutive errors at block {block}: {e}");
+        }
+
+        match kind {
+            RpcErrorKind::RangeTooLarge => {
+                if !batcher.shrink_for_range() {
+                    bail!("chain {cid}: range error at min batch (block {block}): {e}");
+                }
+                tracing::warn!(
+                    chain_id = cid,
+                    block,
+                    batch_size = batcher.size,
+                    "range too large, shrinking"
+                );
+                Ok(Duration::from_millis(200))
+            }
+            RpcErrorKind::RateLimited => {
+                let d = backoff_duration(errors);
+                tracing::warn!(
+                    chain_id = cid,
+                    block,
+                    delay_ms = d.as_millis(),
+                    "rate limited"
+                );
+                Ok(d)
+            }
+            RpcErrorKind::Transient => {
+                batcher.shrink_transient();
+                let d = backoff_duration(errors);
+                tracing::warn!(chain_id = cid, block, batch_size = batcher.size, delay_ms = d.as_millis(), error = %e, "transient error");
+                Ok(d)
+            }
+        }
+    }
+
+    /// Emit a progress log line for the fetch loop.
+    fn log_progress(cid: u64, block: u64, from: u64, to: u64, reqs: u64, batcher: &Batcher) {
+        #[expect(
+            clippy::cast_precision_loss,
+            reason = "progress percentage, precision not critical"
+        )]
+        let pct = if to > from {
+            (block - from) as f64 / (to - from) as f64 * 100.0
+        } else {
+            100.0
+        };
+        tracing::info!(
+            chain_id = cid, reqs, block,
+            batch_size = batcher.size,
+            progress = %format_args!("{pct:.0}%"),
+            "fetching",
+        );
+    }
+}
+
+/// Best-effort flush: log a warning on failure but never propagate errors.
+fn best_effort_flush(pending: &mut Vec<Log>, path: &Path, batches: &mut Vec<RecordBatch>) {
+    if let Err(e) = flush(pending, path, batches) {
+        tracing::warn!(error = %e, "best-effort flush failed");
     }
 }
 

@@ -1,4 +1,7 @@
-#![allow(clippy::print_stdout)]
+#![expect(
+    clippy::print_stdout,
+    reason = "example demonstrates output via stdout"
+)]
 //! Build and serialize an ERC-8004 agent registration file (pure offline).
 //!
 //! Usage:
@@ -7,7 +10,12 @@
 //! This example demonstrates how to construct the off-chain JSON registration
 //! file that an agent publishes at its `agentURI`. No RPC connection is needed.
 
+use alloy as _;
 use erc8004::types::{RegistrationFile, ServiceEndpoint};
+use serde as _;
+use serde_json as _;
+use thiserror as _;
+use tokio as _;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Build a registration file using the typed builder.

@@ -16,7 +16,7 @@ use alloy::{
 use crate::{
     contracts::ReputationRegistry,
     error::Result,
-    types::{Feedback, ReputationSummary},
+    types::{Feedback, FeedbackInput, ReputationSummary},
 };
 
 /// A handle to the Reputation Registry contract bound to a specific provider.
@@ -36,43 +36,23 @@ impl<P: Provider> Reputation<P> {
 
     /// Submit feedback for an agent.
     ///
-    /// # Parameters
-    ///
-    /// - `agent_id`: The target agent's on-chain ID.
-    /// - `value`: Signed feedback value (e.g. a score).
-    /// - `value_decimals`: Number of decimal places for `value`.
-    /// - `tag1`: Primary categorization tag (e.g. `"a2a.task"`).
-    /// - `tag2`: Secondary categorization tag.
-    /// - `endpoint`: The endpoint this feedback relates to.
-    /// - `feedback_uri`: URI pointing to off-chain feedback details.
-    /// - `feedback_hash`: Keccak-256 hash of the feedback URI content.
+    /// See [`FeedbackInput`] for field documentation.
     ///
     /// # Errors
     ///
     /// Returns an error if the transaction fails.
-    #[allow(clippy::too_many_arguments)]
-    pub async fn give_feedback(
-        &self,
-        agent_id: U256,
-        value: i128,
-        value_decimals: u8,
-        tag1: &str,
-        tag2: &str,
-        endpoint: &str,
-        feedback_uri: &str,
-        feedback_hash: FixedBytes<32>,
-    ) -> Result<()> {
+    pub async fn give_feedback(&self, input: FeedbackInput) -> Result<()> {
         let contract = ReputationRegistry::new(self.address, &self.provider);
         contract
             .giveFeedback(
-                agent_id,
-                value,
-                value_decimals,
-                tag1.to_owned(),
-                tag2.to_owned(),
-                endpoint.to_owned(),
-                feedback_uri.to_owned(),
-                feedback_hash,
+                input.agent_id,
+                input.value,
+                input.value_decimals,
+                input.tag1,
+                input.tag2,
+                input.endpoint,
+                input.feedback_uri,
+                input.feedback_hash,
             )
             .send()
             .await?

@@ -1,4 +1,7 @@
-#![allow(clippy::print_stdout)]
+#![expect(
+    clippy::print_stdout,
+    reason = "example demonstrates output via stdout"
+)]
 //! Query an agent's on-chain identity from the ERC-8004 Identity Registry.
 //!
 //! Usage:
@@ -9,6 +12,9 @@
 
 use alloy::{primitives::U256, providers::ProviderBuilder};
 use erc8004::{Erc8004, Network};
+use serde as _;
+use serde_json as _;
+use thiserror as _;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

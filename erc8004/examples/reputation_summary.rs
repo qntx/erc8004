@@ -1,4 +1,7 @@
-#![allow(clippy::print_stdout)]
+#![expect(
+    clippy::print_stdout,
+    reason = "example demonstrates output via stdout"
+)]
 //! Query an agent's reputation summary from the ERC-8004 Reputation Registry.
 //!
 //! Usage:
@@ -8,6 +11,9 @@
 
 use alloy::{primitives::U256, providers::ProviderBuilder};
 use erc8004::{Erc8004, Network};
+use serde as _;
+use serde_json as _;
+use thiserror as _;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -41,7 +47,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     // Read the first feedback entry from the first client.
-    let feedback = reputation.read_feedback(agent_id, clients[0], 0).await?;
+    let Some(&first_client) = clients.first() else {
+        return Ok(());
+    };
+    let feedback = reputation.read_feedback(agent_id, first_client, 0).await?;
     println!(
         "First feedback: value={}, tag1={:?}, tag2={:?}, revoked={}",
         feedback.value, feedback.tag1, feedback.tag2, feedback.is_revoked,

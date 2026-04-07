@@ -10,9 +10,18 @@
 use std::path::PathBuf;
 use std::time::Duration;
 
+use alloy as _;
 use anyhow::{Context, Result, bail};
+use arrow_array as _;
+use arrow_schema as _;
 use clap::{Parser, Subcommand};
+use erc8004 as _;
 use erc8004_events::{chains, config::Config, fetcher};
+use parquet as _;
+use serde as _;
+use serde_json as _;
+use toml as _;
+use tracing as _;
 
 /// ERC-8004 raw on-chain event archiver.
 #[derive(Debug, Parser)]
@@ -124,7 +133,7 @@ async fn main() -> Result<()> {
 }
 
 /// Print all known chain configurations.
-#[allow(clippy::print_stdout)]
+#[expect(clippy::print_stdout, reason = "CLI list command outputs to stdout")]
 fn cmd_list(config: &Config) {
     println!(
         "{:<12} {:<20} {:<8} {:<15} {:<6} RPCs",
@@ -141,7 +150,7 @@ fn cmd_list(config: &Config) {
             kind,
             c.deployment_block,
             rpcs.len(),
-            rpcs[0],
+            rpcs.first().map_or("", String::as_str),
         );
     }
 }

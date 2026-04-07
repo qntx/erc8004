@@ -6,7 +6,7 @@
 //! When no config file is present the built-in defaults from
 //! [`crate::chains::ChainConfig::default_rpc`] are used.
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::path::Path;
 
 use anyhow::{Context, Result};
@@ -17,7 +17,7 @@ use serde::Deserialize;
 pub struct Config {
     /// Per-chain RPC overrides, keyed by chain ID.
     #[serde(default)]
-    pub chains: HashMap<u64, ChainRpcs>,
+    pub chains: BTreeMap<u64, ChainRpcs>,
 }
 
 /// RPC endpoint list for a single chain.
