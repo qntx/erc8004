@@ -13,8 +13,8 @@
 [![Rust][rust-badge]][rust-url]
 [![Dataset][hf-badge]][hf-url]
 
-[ci-badge]: https://github.com/qntx/erc8004/actions/workflows/rust.yml/badge.svg
-[ci-url]: https://github.com/qntx/erc8004/actions/workflows/rust.yml
+[ci-badge]: https://github.com/qntx/erc8004/actions/workflows/ci.yml/badge.svg
+[ci-url]: https://github.com/qntx/erc8004/actions/workflows/ci.yml
 [crate-badge]: https://img.shields.io/crates/v/erc8004.svg
 [crate-url]: https://crates.io/crates/erc8004
 [doc-badge]: https://img.shields.io/docsrs/erc8004.svg
