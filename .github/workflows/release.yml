@@ -1,0 +1,13 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: qntx/workflows/.github/workflows/release.yml@main
