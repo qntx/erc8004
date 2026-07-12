@@ -16,7 +16,7 @@ erc8004-events = { version = "0.4", path = "erc8004-events" }
 
 alloy = { version = "2.0.4", features = ["full"] }
 anyhow = "1.0.102"
-arrow-array = "58.2.0"
+arrow-array = "59.1.0"
 arrow-schema = "58.1.0"
 clap = { version = "4.6.1", features = ["derive"] }
 parquet = { version = "58.1.0", features = ["arrow"] }
