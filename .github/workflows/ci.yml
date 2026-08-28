@@ -16,4 +16,3 @@ jobs:
       contents: read
     with:
       submodules: true
-      deny: true
