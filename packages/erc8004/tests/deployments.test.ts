@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { getAddress } from "viem";
 import { describe, expect, test } from "vite-plus/test";
 
@@ -35,6 +37,19 @@ describe("deployments table", () => {
     const byChainId = (a: Deployment, b: Deployment): number => a.chainId - b.chainId;
     expect(mainnets).toStrictEqual(mainnets.toSorted(byChainId));
     expect(testnets).toStrictEqual(testnets.toSorted(byChainId));
+  });
+
+  test("table matches data/deployments.json", () => {
+    const raw = JSON.parse(readFileSync("../../data/deployments.json", "utf8")) as {
+      deployments: Array<Record<string, unknown>>;
+    };
+    expect(all).toHaveLength(raw.deployments.length);
+    const byId = new Map(raw.deployments.map((d) => [d["id"], d]));
+    for (const d of all) {
+      const want = byId.get(d.id);
+      expect(want, `${d.id} in deployments.json`).toBeDefined();
+      expect(d).toStrictEqual({ ...want });
+    }
   });
 
   test("the three registry addresses are distinct", () => {

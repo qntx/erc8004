@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "capability": "registration.conformance",
+  "source": { "kind": "spec", "spec": "AGENTS.md" },
+  "cases": [
+    {
+      "input": {
+        "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+        "name": "Agent",
+        "description": "Does things",
+        "registrations": [{ "agentId": 1, "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" }]
+      },
+      "output": []
+    },
+    { "input": {}, "output": [{ "code": "MissingType" }, { "code": "MissingName" }, { "code": "MissingDescription" }, { "code": "MissingRegistrations" }] },
+    {
+      "input": { "type": "https://example.com/other" },
+      "output": [{ "code": "UnknownType" }, { "code": "MissingName" }, { "code": "MissingDescription" }, { "code": "MissingRegistrations" }]
+    },
+    {
+      "input": { "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1", "name": "n", "description": "d", "registrations": [] },
+      "output": [{ "code": "MissingRegistrations" }]
+    },
+    {
+      "input": {
+        "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+        "name": "n",
+        "description": "d",
+        "registrations": [{ "agentId": 1, "agentRegistry": "foo" }, { "agentId": 2, "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" }, { "agentId": 3, "agentRegistry": "EIP155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" }]
+      },
+      "output": [{ "code": "InvalidAgentRegistry", "index": "0" }, { "code": "InvalidAgentRegistry", "index": "2" }]
+    },
+    {
+      "input": {
+        "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+        "name": "n",
+        "description": "d",
+        "registrations": [{ "agentId": 1, "agentRegistry": "eip155:2:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" }]
+      },
+      "output": []
+    }
+  ]
+}

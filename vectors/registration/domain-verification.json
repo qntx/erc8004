@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "capability": "registration.domain-verification",
+  "source": { "kind": "spec", "spec": "AGENTS.md" },
+  "cases": [
+    { "op": "url", "input": "https://example.com", "output": "https://example.com/.well-known/agent-registration.json" },
+    { "op": "url", "input": "https://example.com:443", "output": "https://example.com/.well-known/agent-registration.json" },
+    { "op": "url", "input": "https://example.com:443/", "output": "https://example.com/.well-known/agent-registration.json" },
+    { "op": "url", "input": "https://example.com:8443", "output": "https://example.com:8443/.well-known/agent-registration.json" },
+    { "op": "url", "input": "https://example.com/path?q=1#frag", "output": "https://example.com/.well-known/agent-registration.json" },
+    { "op": "url", "input": "https://EXAMPLE.COM", "output": "https://example.com/.well-known/agent-registration.json" },
+    { "op": "url", "input": "https://sub.example.com.", "output": "https://sub.example.com./.well-known/agent-registration.json" },
+    { "op": "url", "input": "https://", "output": null },
+    { "op": "url", "input": "https:///x", "output": null },
+    { "op": "url", "input": "https://user@example.com", "output": null },
+    { "op": "url", "input": "https://user:pw@example.com", "output": null },
+    { "op": "url", "input": "http://example.com", "output": null },
+    { "op": "url", "input": "example.com", "output": null },
+    { "op": "url", "input": "https://example.com:443x", "output": "https://example.com:443x/.well-known/agent-registration.json" },
+    {
+      "op": "verify",
+      "file": { "registrations": [{ "agentId": 5, "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" }] },
+      "agentRegistry": "eip155:1:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432",
+      "agentId": "5",
+      "output": true
+    },
+    {
+      "op": "verify",
+      "file": { "registrations": [{ "agentId": 5, "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" }] },
+      "agentRegistry": "eip155:2:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "agentId": "5",
+      "output": false
+    },
+    {
+      "op": "verify",
+      "file": { "registrations": [{ "agentId": 5, "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" }] },
+      "agentRegistry": "eip155:1:0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "agentId": "5",
+      "output": false
+    },
+    {
+      "op": "verify",
+      "file": { "registrations": [{ "agentId": 5, "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" }] },
+      "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "agentId": "6",
+      "output": false
+    },
+    {
+      "op": "verify",
+      "file": { "registrations": [{ "agentId": 5, "agentRegistry": "not-an-agent-registry" }, { "agentId": 5, "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" }] },
+      "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "agentId": "5",
+      "output": true
+    },
+    { "op": "verify", "file": {}, "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432", "agentId": "5", "output": false },
+    {
+      "op": "verify",
+      "file": { "registrations": [{ "agentId": "9007199254740993", "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" }] },
+      "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "agentId": "9007199254740993",
+      "output": true
+    }
+  ]
+}

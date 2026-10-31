@@ -2,3 +2,4 @@
 export { identityRegistryAbi } from "./identity.ts";
 export { reputationRegistryAbi } from "./reputation.ts";
 export { validationRegistryAbi } from "./validation.ts";
+export { protocolEventsAbi } from "./protocol-events.ts";

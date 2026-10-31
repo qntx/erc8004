@@ -24,8 +24,22 @@ crates.io). npm and crate versions are lockstep.
 ### Added
 
 - `@qntx/erc8004` (`packages/erc8004`): TypeScript SDK with the vendored
-  registry ABIs (`/abi`), the shared error base (`/core`), and the verified
-  on-chain deployment table (`/deployments`).
+  registry ABIs (`/abi`), the pure core (`/core`: agent registry parse/format,
+  feedback value, revert-reason decoding, JSON document errors, content hash),
+  the registration layer (`/registration`: lenient/lossless file model,
+  conformance checks, data URIs, agentURI classification, endpoint-domain
+  verification), the event decoder (`/events`), the `AgentWalletSet` EIP-712
+  helpers (`/identity`), the feedback-file model (`/reputation`), and the
+  verified
+  deployment table (`/deployments`) — all against shared vectors in
+  `vectors/` (`bun run vectors` regenerates the reference vectors).
+- `erc8004` (`crates/erc8004`) rewritten as the matching pure Rust core —
+  same modules, same error codes, same vectors (`tests/vectors.rs`), plus
+  a `sol!`-vs-vendored-ABI selector/topic parity test. The provider-era API
+  (`client`, `contracts`, `networks`, `identity`, `reputation`, `validation`,
+  `types`, `examples/`) is removed; provider work returns in a later phase.
+  The crate now builds for `wasm32-unknown-unknown` with no `tokio`/`reqwest`
+  in its dependency tree.
 - `data/abis/` vendors the upstream `erc-8004-contracts` ABIs verbatim;
   `bun run gen` regenerates the TS ABI modules and deployment table from
   `data/`.

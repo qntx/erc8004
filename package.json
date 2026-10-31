@@ -14,12 +14,13 @@
   "type": "module",
   "scripts": {
     "gen": "bun scripts/gen.ts",
-    "lint": "vp check && taplo fmt --check && bun scripts/check-version.ts && bun scripts/gen.ts --check && bun scripts/parity/check.ts",
+    "lint": "vp check && taplo fmt --check && bun scripts/check-version.ts && bun scripts/gen.ts --check && bun scripts/parity/check.ts && bun run vectors --check",
     "typecheck": "vp run -r typecheck && tsc --noEmit",
     "build": "vp run -r build",
     "test": "vp run -r test && vp test",
     "release": "bumpp",
-    "prepare": "vp config"
+    "prepare": "vp config",
+    "vectors": "bun packages/erc8004/scripts/vectors/all.ts"
   },
   "devDependencies": {
     "@qntx/oxfmt": "1.1.1",

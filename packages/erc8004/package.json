@@ -63,6 +63,9 @@
     "check:pkg": "vp pack && publint && attw --pack . --profile esm-only",
     "prepublishOnly": "vp run build"
   },
+  "dependencies": {
+    "@scure/base": "^2.4.0"
+  },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
     "@qntx/tsconfig": "1.0.1",

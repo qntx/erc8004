@@ -34,11 +34,19 @@ JSON files share a single envelope:
 
 - `schema` — envelope version, currently always `1`.
 - `capability` — the `parity.json` capability id this file exercises.
-- `source.kind` — `official` (upstream vector, verbatim), `reference`
-  (produced by an independent reference implementation; record its name and
-  version in `source`), or `generated` (frozen output of the TS
-  implementation; `generator` names the producing script/package and
+- `source.kind` — `spec` (hand-authored from the AGENTS.md "Shared
+  semantics" rules; expected outputs are written from the spec, not dumped
+  from an implementation), `official` (upstream vector, verbatim),
+  `reference` (produced by an independent reference implementation; record
+  its name and version in `source`), or `generated` (frozen output of the
+  TS implementation; `generator` names the producing script/package and
   `version` the package version that produced it).
 - `cases` — always an array. Success cases carry inputs and expected outputs;
-  failure cases carry an `error` field naming the shared error code.
-  Runners branch on the case fields; a file may mix case shapes.
+  failure cases carry an `error` field naming the shared error code (plus
+  `field` where the code is field-scoped). Runners branch on the case
+  fields; a file may mix case shapes.
+
+The normal form for on-chain values in vector outputs: every integer (any
+int/uint width, including uint8) is a decimal string, addresses are
+EIP-55, bytes/bytes32 are lowercase `0x` hex, booleans and strings are
+native JSON.

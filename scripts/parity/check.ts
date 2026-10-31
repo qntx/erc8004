@@ -69,10 +69,14 @@ export function checkParity(
     // src/ files holding in-crate vector tests) that run this capability's
     // vectors. Every capability is dual-language; there is no TS-only escape.
     const rustValue = cap["rust"];
-    const rust: { tests: string[] } = { tests: [] };
+    const rust: { module?: string; tests: string[] } = { tests: [] };
     if (rustValue === null || rustValue === undefined) {
       errors.push(`${label}: rust must list at least one test file`);
     } else if (isRecord(rustValue)) {
+      const rustModule = rustValue["module"];
+      if (typeof rustModule === "string" && rustModule !== "") {
+        rust.module = rustModule;
+      }
       rust.tests = asStrings(rustValue["tests"]);
       if (rust.tests.length === 0) {
         errors.push(`${label}: rust.tests must list at least one test file`);
@@ -82,6 +86,9 @@ export function checkParity(
     }
 
     const testFiles = [...tsTests, ...rust.tests];
+    if (rust.module !== undefined) {
+      testFiles.push(rust.module);
+    }
 
     for (const path of [tsModule, ...testFiles]) {
       if (typeof path === "string" && !fileExists(path)) {

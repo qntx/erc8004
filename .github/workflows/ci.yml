@@ -32,3 +32,12 @@ jobs:
       doc: true
       package-check: true
       packages: erc8004
+
+  cross:
+    uses: qntx/workflows/.github/workflows/ci-rust-cross.yml@v2
+    permissions:
+      contents: read
+    with:
+      targets: wasm32-unknown-unknown
+      packages: erc8004
+      forbid-deps: tokio

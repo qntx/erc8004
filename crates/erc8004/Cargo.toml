@@ -12,20 +12,19 @@ keywords.workspace     = true
 categories             = ["cryptography::cryptocurrencies", "api-bindings"]
 readme                 = "README.md"
 documentation          = "https://docs.rs/erc8004"
-include                = ["src/**/*", "examples/**/*", "Cargo.toml", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
+include                = ["src/**/*", "Cargo.toml", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
 
 [package.metadata.docs.rs]
 all-features = true
 
 [dependencies]
 alloy.workspace      = true
-serde.workspace      = true
+base64.workspace     = true
 serde_json.workspace = true
 thiserror.workspace  = true
 
 [dev-dependencies]
-alloy = { workspace = true, features = ["node-bindings"] }
-tokio = { workspace = true }
+alloy = { workspace = true, features = ["json-abi"] }
 
 [lints]
 workspace = true

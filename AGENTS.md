@@ -22,14 +22,14 @@ ERC-8004 (Trustless Agents) protocol SDK in two languages: `@qntx/erc8004` (Type
 
 - `viem` is a peer dependency; `@scure/base` is the only other runtime dependency (caret range). devDependencies are exact-pinned.
 - `src/` is platform-neutral and Hermes V1-safe: no Node or browser globals, no `node:*` imports, no ES2023+ array methods (`tsconfig.src.json` compiles `src` against `es2022`). All I/O is injected (`fetch` defaults to a call-time `globalThis.fetch` lookup); no ambient singletons.
-- One-directional layering, enforced by lint (`LAYERS` in `vite.config.ts`): `abi` and `core` are leaves; `deployments` and `registration` import `core`; `events` imports `abi`, `core`; `identity`, `reputation`, `validation` import `abi`, `core`, `deployments`, `events`; the package root composes everything and exports the `erc8004PublicActions()` / `erc8004WalletActions()` client decorators. Every layer is a subpath export.
+- One-directional layering, enforced by lint (`LAYERS` in `vite.config.ts`): `abi` is the leaf (pure data); `core` imports `abi` (revert decoding needs the ABI errors); `deployments` and `registration` import `core`; `events` imports `abi`, `core`; `identity`, `reputation`, `validation` import `abi`, `core`, `deployments`, `events`; the package root composes everything and exports the `erc8004PublicActions()` / `erc8004WalletActions()` client decorators. Every layer is a subpath export.
 - Actions are viem-style free functions `(client, args)`. Registry addresses resolve from `args.address`, else the decorator's bound deployment, else `client.chain.id` via the deployment table; otherwise `UnsupportedChainError`. Write actions return the transaction `Hash`; receipt helpers (`parseRegisteredAgentId`, `parseFeedbackIndex`, ...) decode results from logs.
 
 ## Rust (`crates/erc8004`)
 
 - One crate. Features gate dependencies only: `provider` (alloy RPC actions) and `fetch` (reqwest agentURI resolution); `default = ["provider", "fetch"]`. `--no-default-features` is the sans-IO core and must build for `wasm32-unknown-unknown` with no `tokio` in the tree.
 - Contract bindings are inline `sol!` interfaces without `#[sol(rpc)]`; a test asserts every selector and event topic matches `data/abis`. The provider layer uses one generic `eth_call` helper and one send helper that waits for the receipt, checks its status, and decodes reverts.
-- Public API types are std, `serde_json::Value`/`Map`, and alloy primitives (`Address`, `U256`, `B256`, `Bytes`, `Log`, `Signature`) only; no other third-party types. One `#[non_exhaustive]` error enum per module.
+- Public API types are std, `serde_json::Value`/`Map`, alloy primitives (`Address`, `U256`, `B256`, `Bytes`, `Log`, `Signature`), and `Eip712Domain` (alloy-sol-types) only; no other third-party types. One `#[non_exhaustive]` error enum per module.
 - Follow the Rust API Guidelines. No panics and no `unwrap`/`expect` outside tests.
 
 ## Shared semantics

@@ -8,10 +8,8 @@ all-features = true
 feature-depth = 1
 
 [advisories]
-# `alloy` transitively depends on unmaintained `paste` (RUSTSEC-2024-0436) and
-# on `crypto-bigint` 0.5 via `elliptic-curve`/`k256` (RUSTSEC-2026-0387, fixed
-# in 0.7 which `elliptic-curve` 0.13 cannot take). Do not expand casually.
-ignore = [{ id = "RUSTSEC-2024-0436", reason = "transitive via alloy-primitives (unmaintained paste); drop when alloy replaces it" }, { id = "RUSTSEC-2026-0387", reason = "transitive via k256/elliptic-curve 0.13 (crypto-bigint 0.5); drop when alloy moves to crypto-bigint 0.7" }]
+# `alloy` transitively depends on unmaintained `paste` (RUSTSEC-2024-0436).
+ignore = [{ id = "RUSTSEC-2024-0436", reason = "transitive via alloy-primitives (unmaintained paste); drop when alloy replaces it" }]
 
 [licenses]
 confidence-threshold = 0.8

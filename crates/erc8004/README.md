@@ -1,13 +1,16 @@
 # erc8004
 
-ERC-8004 Trustless Agents Rust SDK: the Identity, Reputation and Validation
-registries at contract version `2.0.0`, the off-chain registration and
-feedback files, agentURI resolution, and the `AgentWalletSet` EIP-712
-message. Protocol layer only — no IPFS pinning, no subgraph, no indexer.
+ERC-8004 Trustless Agents Rust SDK — the pure (sans-IO) protocol core:
+the Identity, Reputation and Validation registry ABIs (vendored at contract
+version `2.0.0`), the `eip155:{chainId}:{address}` agent registry, feedback
+values, the off-chain registration and feedback files, `data:` URIs, agentURI
+classification, endpoint-domain verification, the `AgentWalletSet` EIP-712
+message, the revert-reason decoder, the protocol event decoder, and the
+verified deployment table — all with no RPC, provider or fetching code.
 
-> The crate is mid-refactor to the dual-language layout in the repository
-> `AGENTS.md`; the current API predates the new deployment table and
-> sans-IO core and changes without notice until 0.6.0.
+This is the Rust half of the dual-language SDK described in the repository
+`AGENTS.md`, sharing error codes and test vectors with `@qntx/erc8004`.
+RPC/provider functionality arrives in a later phase.
 
 ## License
 

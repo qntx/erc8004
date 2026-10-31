@@ -25,7 +25,7 @@ const platformNeutralImports = {
 // "TypeScript" section of AGENTS.md, which describes the same graph.
 const LAYERS = {
   abi: [],
-  core: [],
+  core: ["abi"],
   deployments: ["core"],
   registration: ["core"],
   events: ["abi", "core"],
@@ -105,6 +105,28 @@ const config: UserConfig = defineConfig({
           // endpoint probing (first success wins) is intentional.
           "eslint/no-console": "off",
           "eslint/no-await-in-loop": "off",
+          // Generators adapt loosely-typed ABI/vector data into viem calls.
+          "typescript/no-unsafe-argument": "off",
+          "typescript/no-unsafe-assignment": "off",
+          "typescript/no-unsafe-call": "off",
+          "typescript/no-unsafe-member-access": "off",
+          "typescript/no-unsafe-return": "off",
+          "typescript/no-unsafe-type-assertion": "off",
+          "typescript/non-nullable-type-assertion-style": "off",
+        },
+      },
+      {
+        // Vector runners and shared helpers adapt `unknown` vector cases; the
+        // preset relaxes the same rules for `*.test.*` only.
+        files: ["packages/erc8004/tests/**"],
+        rules: {
+          "typescript/no-unsafe-argument": "off",
+          "typescript/no-unsafe-assignment": "off",
+          "typescript/no-unsafe-call": "off",
+          "typescript/no-unsafe-member-access": "off",
+          "typescript/no-unsafe-return": "off",
+          "typescript/no-unsafe-type-assertion": "off",
+          "typescript/non-nullable-type-assertion-style": "off",
         },
       },
       {
