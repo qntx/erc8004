@@ -61,7 +61,8 @@
     "test": "vp test",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.src.json",
     "check:pkg": "vp pack && publint && attw --pack . --profile esm-only",
-    "prepublishOnly": "vp run build"
+    "prepublishOnly": "vp run build",
+    "test:e2e": "vp test tests/e2e"
   },
   "dependencies": {
     "@scure/base": "^2.4.0"

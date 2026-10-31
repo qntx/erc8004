@@ -14,7 +14,7 @@ ERC-8004 (Trustless Agents) protocol SDK in two languages: `@qntx/erc8004` (Type
 
 ## Source data
 
-- `data/abis/*.json` are the upstream ABIs vendored verbatim from `erc-8004/erc-8004-contracts` at the commit recorded in `data/SOURCE.md`. Never edit them by hand; re-vendor and bump the commit.
+- `data/contracts/*.sol` are the upstream registry contracts vendored verbatim from `erc-8004/erc-8004-contracts` at the commit recorded in `data/SOURCE.md`. `data/abis/*.json` are **derived**: `bun run abi` regenerates them via `forge inspect` (upstream's committed `abis/` is stale relative to its own sources, so it is never used). The `e2e` Foundry project compiles them via `src = "../data/contracts"` + a `contracts/` remapping.
 - `data/deployments.json` is the single source of truth for known deployments. A chain is listed only when `scripts/deployments/verify.ts` has confirmed on-chain that all three registries answer `getVersion() == "2.0.0"` and that Reputation and Validation `getIdentityRegistry()` return the Identity address. Placeholder proxies (`MinimalUUPS` `0.0.1`, `MinimalUUPSMainnet` `1.0.0`) and unreachable chains are excluded. Each entry carries `id` (kebab-case), `name`, `chainId`, `testnet`, and the three registry addresses (EIP-55).
 - `bun run gen` regenerates `packages/erc8004/src/abi/*.ts` (`as const`) from `data/abis`, and the TS and Rust deployment tables from `data/deployments.json`; `bun run lint` runs it in check mode so generated files never drift.
 
@@ -49,3 +49,30 @@ Both languages implement the same capabilities with the same rules; `parity.json
 
 - npm and crate versions are lockstep: `[workspace.package].version` equals `packages/erc8004/package.json`; `scripts/check-version.ts` and `scripts/sync-versions.ts` guard drift; `bumpp` opens a `release/v<version>` PR and the merge commit is tagged by hand. Tags publish to npm (`publish-npm.yml`, OIDC) and crates.io (`publish-crates.yml`).
 - TOML is formatted by taplo (`.taplo.toml`, aligned `=`); keep `taplo fmt --check` green.
+
+## Commands
+
+Local gate before a pull request:
+
+```bash
+bun run lint && bun run typecheck && bun run test   # lint includes taplo,
+                                                    # version, layer and
+                                                    # parity checks
+bun run build && bun run --cwd packages/erc8004 check:pkg
+taplo fmt --check
+cargo fmt --all --check
+cargo clippy -p erc8004 --all-targets --all-features -- -D warnings
+cargo clippy -p erc8004 --all-targets --no-default-features -- -D warnings
+cargo test -p erc8004 --all-features
+cargo test -p erc8004 --no-default-features
+cargo hack check -p erc8004 --each-feature --no-dev-deps
+cargo check -p erc8004 --target wasm32-unknown-unknown --no-default-features
+RUSTDOCFLAGS="-D warnings" cargo doc -p erc8004 --all-features --no-deps
+cargo deny check
+cargo tree -p erc8004 -e normal --no-default-features | rg -i 'tokio|reqwest'
+                                                    # must print nothing
+cargo tree -p erc8004 -e normal -d | rg reqwest    # no duplicate reqwest
+e2e/run.sh                                          # anvil + forge + bun +
+                                                    # cargo; leaves anvil
+                                                    # stopped
+```

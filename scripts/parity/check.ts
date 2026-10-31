@@ -98,7 +98,15 @@ export function checkParity(
 
     const vectors = asStrings(cap["vectors"]);
     if (vectors.length === 0) {
-      errors.push(`${label}: vectors must list at least one vector file`);
+      // vectorless capabilities are allowed only when both languages list a
+      // concrete e2e or unit test file exercising the shared semantics
+      const hasTest = (tests: string[]) =>
+        tests.some((t) => /e2e|test/i.test(basename(t)) && fileExists(t));
+      if (!hasTest(tsTests) || !hasTest(rust.tests)) {
+        errors.push(
+          `${label}: vectors may be empty only when both ts.tests and rust.tests list an e2e or unit test file`,
+        );
+      }
     }
     const citedBy = (tests: string[], vector: string): boolean => {
       const needles = [vector, basename(vector)];

@@ -142,5 +142,53 @@
       "tests": ["crates/erc8004/tests/vectors.rs"]
     },
     "vectors": ["data/deployments.json"]
+  },
+  {
+    "id": "identity.actions",
+    "ts": {
+      "module": "packages/erc8004/src/identity/actions.ts",
+      "tests": ["packages/erc8004/tests/e2e/core.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/provider/identity.rs",
+      "tests": ["crates/erc8004/tests/e2e.rs"]
+    },
+    "vectors": []
+  },
+  {
+    "id": "reputation.actions",
+    "ts": {
+      "module": "packages/erc8004/src/reputation/actions.ts",
+      "tests": ["packages/erc8004/tests/e2e/core.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/provider/reputation.rs",
+      "tests": ["crates/erc8004/tests/e2e.rs"]
+    },
+    "vectors": []
+  },
+  {
+    "id": "validation.actions",
+    "ts": {
+      "module": "packages/erc8004/src/validation/actions.ts",
+      "tests": ["packages/erc8004/tests/e2e/core.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/provider/validation.rs",
+      "tests": ["crates/erc8004/tests/e2e.rs"]
+    },
+    "vectors": []
+  },
+  {
+    "id": "registration.resolve",
+    "ts": {
+      "module": "packages/erc8004/src/registration/resolve.ts",
+      "tests": ["packages/erc8004/tests/resolve.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/resolve.rs",
+      "tests": ["crates/erc8004/tests/e2e.rs"]
+    },
+    "vectors": []
   }
 ]

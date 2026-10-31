@@ -9,7 +9,15 @@ export {
   JsonDocumentError,
   UnsupportedChainError,
 } from "./errors.ts";
+export {
+  ClientGuardError,
+  ContractRevertError,
+  MissingEventError,
+  ResolveError,
+} from "./errors.ts";
 export type {
+  ClientGuardErrorCode,
+  ResolveErrorCode,
   AgentRegistryErrorCode,
   AgentUriErrorCode,
   AgentWalletDeadlineErrorCode,

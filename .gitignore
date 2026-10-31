@@ -21,3 +21,10 @@ docs/*
 target/
 
 .vitest/
+
+# e2e foundry artifacts
+e2e/dependencies/
+e2e/out/
+e2e/cache/
+e2e/broadcast/
+target/e2e/

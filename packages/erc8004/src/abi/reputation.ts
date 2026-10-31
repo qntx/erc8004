@@ -2,728 +2,728 @@
 // Source: data/abis/ReputationRegistry.json (see data/SOURCE.md).
 export const reputationRegistryAbi = [
   {
+    type: "constructor",
     inputs: [],
     stateMutability: "nonpayable",
-    type: "constructor",
   },
   {
-    inputs: [
-      {
-        internalType: "address",
-        name: "target",
-        type: "address",
-      },
-    ],
-    name: "AddressEmptyCode",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "implementation",
-        type: "address",
-      },
-    ],
-    name: "ERC1967InvalidImplementation",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "ERC1967NonPayable",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "FailedCall",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "InvalidInitialization",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "NotInitializing",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-    ],
-    name: "OwnableInvalidOwner",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "OwnableUnauthorizedAccount",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "UUPSUnauthorizedCallContext",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "slot",
-        type: "bytes32",
-      },
-    ],
-    name: "UUPSUnsupportedProxiableUUID",
-    type: "error",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "agentId",
-        type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "clientAddress",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "uint64",
-        name: "feedbackIndex",
-        type: "uint64",
-      },
-    ],
-    name: "FeedbackRevoked",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint64",
-        name: "version",
-        type: "uint64",
-      },
-    ],
-    name: "Initialized",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "agentId",
-        type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "clientAddress",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint64",
-        name: "feedbackIndex",
-        type: "uint64",
-      },
-      {
-        indexed: false,
-        internalType: "int128",
-        name: "value",
-        type: "int128",
-      },
-      {
-        indexed: false,
-        internalType: "uint8",
-        name: "valueDecimals",
-        type: "uint8",
-      },
-      {
-        indexed: true,
-        internalType: "string",
-        name: "indexedTag1",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "tag1",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "tag2",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "endpoint",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "feedbackURI",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "bytes32",
-        name: "feedbackHash",
-        type: "bytes32",
-      },
-    ],
-    name: "NewFeedback",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "previousOwner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "OwnershipTransferred",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "agentId",
-        type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "clientAddress",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint64",
-        name: "feedbackIndex",
-        type: "uint64",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "responder",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "responseURI",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "bytes32",
-        name: "responseHash",
-        type: "bytes32",
-      },
-    ],
-    name: "ResponseAppended",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "implementation",
-        type: "address",
-      },
-    ],
-    name: "Upgraded",
-    type: "event",
-  },
-  {
-    inputs: [],
+    type: "function",
     name: "UPGRADE_INTERFACE_VERSION",
+    inputs: [],
     outputs: [
       {
-        internalType: "string",
         name: "",
         type: "string",
+        internalType: "string",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "appendResponse",
     inputs: [
       {
-        internalType: "uint256",
         name: "agentId",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "address",
         name: "clientAddress",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "uint64",
         name: "feedbackIndex",
         type: "uint64",
+        internalType: "uint64",
       },
       {
-        internalType: "string",
         name: "responseURI",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "bytes32",
         name: "responseHash",
         type: "bytes32",
+        internalType: "bytes32",
       },
     ],
-    name: "appendResponse",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
+    type: "function",
+    name: "getClients",
     inputs: [
       {
-        internalType: "uint256",
         name: "agentId",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
-    name: "getClients",
     outputs: [
       {
-        internalType: "address[]",
         name: "",
         type: "address[]",
+        internalType: "address[]",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [],
+    type: "function",
     name: "getIdentityRegistry",
+    inputs: [],
     outputs: [
       {
-        internalType: "address",
         name: "",
         type: "address",
+        internalType: "address",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "getLastIndex",
     inputs: [
       {
-        internalType: "uint256",
         name: "agentId",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "address",
         name: "clientAddress",
         type: "address",
+        internalType: "address",
       },
     ],
-    name: "getLastIndex",
     outputs: [
       {
-        internalType: "uint64",
         name: "",
         type: "uint64",
+        internalType: "uint64",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "getResponseCount",
     inputs: [
       {
-        internalType: "uint256",
         name: "agentId",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "address",
         name: "clientAddress",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "uint64",
         name: "feedbackIndex",
         type: "uint64",
+        internalType: "uint64",
       },
       {
-        internalType: "address[]",
         name: "responders",
         type: "address[]",
+        internalType: "address[]",
       },
     ],
-    name: "getResponseCount",
     outputs: [
       {
-        internalType: "uint64",
         name: "count",
         type: "uint64",
+        internalType: "uint64",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "getSummary",
     inputs: [
       {
-        internalType: "uint256",
         name: "agentId",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "address[]",
         name: "clientAddresses",
         type: "address[]",
+        internalType: "address[]",
       },
       {
-        internalType: "string",
         name: "tag1",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "string",
         name: "tag2",
         type: "string",
+        internalType: "string",
       },
     ],
-    name: "getSummary",
     outputs: [
       {
-        internalType: "uint64",
         name: "count",
         type: "uint64",
+        internalType: "uint64",
       },
       {
-        internalType: "int128",
         name: "summaryValue",
         type: "int128",
+        internalType: "int128",
       },
       {
-        internalType: "uint8",
         name: "summaryValueDecimals",
         type: "uint8",
+        internalType: "uint8",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [],
+    type: "function",
     name: "getVersion",
+    inputs: [],
     outputs: [
       {
-        internalType: "string",
         name: "",
         type: "string",
+        internalType: "string",
       },
     ],
     stateMutability: "pure",
-    type: "function",
   },
   {
+    type: "function",
+    name: "giveFeedback",
     inputs: [
       {
-        internalType: "uint256",
         name: "agentId",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "int128",
         name: "value",
         type: "int128",
+        internalType: "int128",
       },
       {
-        internalType: "uint8",
         name: "valueDecimals",
         type: "uint8",
+        internalType: "uint8",
       },
       {
-        internalType: "string",
         name: "tag1",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "string",
         name: "tag2",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "string",
         name: "endpoint",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "string",
         name: "feedbackURI",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "bytes32",
         name: "feedbackHash",
         type: "bytes32",
+        internalType: "bytes32",
       },
     ],
-    name: "giveFeedback",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
+    type: "function",
+    name: "initialize",
     inputs: [
       {
-        internalType: "address",
         name: "identityRegistry_",
         type: "address",
+        internalType: "address",
       },
     ],
-    name: "initialize",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
-    inputs: [],
+    type: "function",
     name: "owner",
+    inputs: [],
     outputs: [
       {
-        internalType: "address",
         name: "",
         type: "address",
+        internalType: "address",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [],
+    type: "function",
     name: "proxiableUUID",
+    inputs: [],
     outputs: [
       {
-        internalType: "bytes32",
         name: "",
         type: "bytes32",
+        internalType: "bytes32",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "readAllFeedback",
     inputs: [
       {
-        internalType: "uint256",
         name: "agentId",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "address[]",
         name: "clientAddresses",
         type: "address[]",
+        internalType: "address[]",
       },
       {
-        internalType: "string",
         name: "tag1",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "string",
         name: "tag2",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "bool",
         name: "includeRevoked",
         type: "bool",
+        internalType: "bool",
       },
     ],
-    name: "readAllFeedback",
     outputs: [
       {
-        internalType: "address[]",
         name: "clients",
         type: "address[]",
+        internalType: "address[]",
       },
       {
-        internalType: "uint64[]",
         name: "feedbackIndexes",
         type: "uint64[]",
+        internalType: "uint64[]",
       },
       {
-        internalType: "int128[]",
         name: "values",
         type: "int128[]",
+        internalType: "int128[]",
       },
       {
-        internalType: "uint8[]",
         name: "valueDecimals",
         type: "uint8[]",
+        internalType: "uint8[]",
       },
       {
-        internalType: "string[]",
         name: "tag1s",
         type: "string[]",
+        internalType: "string[]",
       },
       {
-        internalType: "string[]",
         name: "tag2s",
         type: "string[]",
+        internalType: "string[]",
       },
       {
-        internalType: "bool[]",
         name: "revokedStatuses",
         type: "bool[]",
+        internalType: "bool[]",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "readFeedback",
     inputs: [
       {
-        internalType: "uint256",
         name: "agentId",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "address",
         name: "clientAddress",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "uint64",
         name: "feedbackIndex",
         type: "uint64",
+        internalType: "uint64",
       },
     ],
-    name: "readFeedback",
     outputs: [
       {
-        internalType: "int128",
         name: "value",
         type: "int128",
+        internalType: "int128",
       },
       {
-        internalType: "uint8",
         name: "valueDecimals",
         type: "uint8",
+        internalType: "uint8",
       },
       {
-        internalType: "string",
         name: "tag1",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "string",
         name: "tag2",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "bool",
         name: "isRevoked",
         type: "bool",
+        internalType: "bool",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [],
+    type: "function",
     name: "renounceOwnership",
+    inputs: [],
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
+    type: "function",
+    name: "revokeFeedback",
     inputs: [
       {
-        internalType: "uint256",
         name: "agentId",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "uint64",
         name: "feedbackIndex",
         type: "uint64",
+        internalType: "uint64",
       },
     ],
-    name: "revokeFeedback",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
+    type: "function",
+    name: "transferOwnership",
     inputs: [
       {
-        internalType: "address",
         name: "newOwner",
         type: "address",
+        internalType: "address",
       },
     ],
-    name: "transferOwnership",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
+    type: "function",
+    name: "upgradeToAndCall",
     inputs: [
       {
-        internalType: "address",
         name: "newImplementation",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "bytes",
         name: "data",
         type: "bytes",
+        internalType: "bytes",
       },
     ],
-    name: "upgradeToAndCall",
     outputs: [],
     stateMutability: "payable",
-    type: "function",
+  },
+  {
+    type: "event",
+    name: "FeedbackRevoked",
+    inputs: [
+      {
+        name: "agentId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "clientAddress",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "feedbackIndex",
+        type: "uint64",
+        indexed: true,
+        internalType: "uint64",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "Initialized",
+    inputs: [
+      {
+        name: "version",
+        type: "uint64",
+        indexed: false,
+        internalType: "uint64",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "NewFeedback",
+    inputs: [
+      {
+        name: "agentId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "clientAddress",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "feedbackIndex",
+        type: "uint64",
+        indexed: false,
+        internalType: "uint64",
+      },
+      {
+        name: "value",
+        type: "int128",
+        indexed: false,
+        internalType: "int128",
+      },
+      {
+        name: "valueDecimals",
+        type: "uint8",
+        indexed: false,
+        internalType: "uint8",
+      },
+      {
+        name: "indexedTag1",
+        type: "string",
+        indexed: true,
+        internalType: "string",
+      },
+      {
+        name: "tag1",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+      {
+        name: "tag2",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+      {
+        name: "endpoint",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+      {
+        name: "feedbackURI",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+      {
+        name: "feedbackHash",
+        type: "bytes32",
+        indexed: false,
+        internalType: "bytes32",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "OwnershipTransferred",
+    inputs: [
+      {
+        name: "previousOwner",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "newOwner",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "ResponseAppended",
+    inputs: [
+      {
+        name: "agentId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "clientAddress",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "feedbackIndex",
+        type: "uint64",
+        indexed: false,
+        internalType: "uint64",
+      },
+      {
+        name: "responder",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "responseURI",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+      {
+        name: "responseHash",
+        type: "bytes32",
+        indexed: false,
+        internalType: "bytes32",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "Upgraded",
+    inputs: [
+      {
+        name: "implementation",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "error",
+    name: "AddressEmptyCode",
+    inputs: [
+      {
+        name: "target",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "ERC1967InvalidImplementation",
+    inputs: [
+      {
+        name: "implementation",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "ERC1967NonPayable",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "FailedCall",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "InvalidInitialization",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "NotInitializing",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "OwnableInvalidOwner",
+    inputs: [
+      {
+        name: "owner",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "OwnableUnauthorizedAccount",
+    inputs: [
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "UUPSUnauthorizedCallContext",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "UUPSUnsupportedProxiableUUID",
+    inputs: [
+      {
+        name: "slot",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+    ],
   },
 ] as const;

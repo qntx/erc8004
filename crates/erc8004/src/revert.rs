@@ -113,6 +113,62 @@ pub enum RevertReason {
     },
 }
 
+impl std::fmt::Display for RevertReason {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::NotAuthorized => write!(f, "not authorized"),
+            Self::ReservedMetadataKey => write!(f, "reserved metadata key"),
+            Self::InvalidWallet => write!(f, "invalid wallet"),
+            Self::DeadlineExpired => write!(f, "deadline expired"),
+            Self::DeadlineTooFar => write!(f, "deadline too far"),
+            Self::InvalidWalletSignature => write!(f, "invalid wallet signature"),
+            Self::TooManyDecimals => write!(f, "too many decimals"),
+            Self::ValueOutOfRange => write!(f, "value out of range"),
+            Self::SelfFeedback => write!(f, "self-feedback not allowed"),
+            Self::InvalidFeedbackIndex => write!(f, "feedback index must be > 0"),
+            Self::FeedbackIndexOutOfBounds => write!(f, "feedback index out of bounds"),
+            Self::AlreadyRevoked => write!(f, "already revoked"),
+            Self::EmptyResponseUri => write!(f, "empty response uri"),
+            Self::ClientAddressesRequired => write!(f, "client addresses required"),
+            Self::InvalidValidator => write!(f, "invalid validator"),
+            Self::RequestExists => write!(f, "request already exists"),
+            Self::UnknownRequest => write!(f, "unknown request"),
+            Self::NotValidator => write!(f, "not validator"),
+            Self::ResponseOutOfRange => write!(f, "response out of range"),
+            Self::Message { message } => write!(f, "revert: {message}"),
+            Self::AgentNotFound { agent_id } => write!(f, "agent {agent_id} not found"),
+            Self::IncorrectOwner { sender, agent_id, owner } => write!(
+                f,
+                "incorrect owner: {sender} does not own agent {agent_id} (owner {owner})"
+            ),
+            Self::InsufficientApproval { operator, agent_id } => {
+                write!(f, "insufficient approval: {operator} for agent {agent_id}")
+            }
+            Self::InvalidReceiver { receiver } => write!(f, "invalid receiver {receiver}"),
+            Self::InvalidSender { sender } => write!(f, "invalid sender {sender}"),
+            Self::InvalidOwner { owner } => write!(f, "invalid owner {owner}"),
+            Self::InvalidApprover { approver } => write!(f, "invalid approver {approver}"),
+            Self::InvalidOperator { operator } => write!(f, "invalid operator {operator}"),
+            Self::Panic { code } => write!(f, "panic: {code}"),
+            Self::Unknown { data } => write!(f, "unknown revert: 0x{}", hex_encode(data)),
+        }
+    }
+}
+
+fn hex_encode(data: &[u8]) -> String {
+    let mut out = String::with_capacity(data.len() * 2);
+    for &b in data {
+        // both nibbles are < 16 so from_digit always yields a char
+        if let (Some(hi), Some(lo)) =
+            (char::from_digit(u32::from(b >> 4), 16), char::from_digit(u32::from(b & 0x0f), 16))
+        {
+            out.push(hi);
+            out.push(lo);
+        }
+    }
+    out
+}
+
 fn error_string_reason(message: &str) -> RevertReason {
     match message {
         "Not authorized" => RevertReason::NotAuthorized,

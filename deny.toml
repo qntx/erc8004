@@ -9,7 +9,7 @@ feature-depth = 1
 
 [advisories]
 # `alloy` transitively depends on unmaintained `paste` (RUSTSEC-2024-0436).
-ignore = [{ id = "RUSTSEC-2024-0436", reason = "transitive via alloy-primitives (unmaintained paste); drop when alloy replaces it" }]
+ignore = [{ id = "RUSTSEC-2024-0436", reason = "transitive via alloy-primitives (unmaintained paste); drop when alloy replaces it" }, { id = "RUSTSEC-2026-0387", reason = "crypto-bigint 0.5 timing; dev-dep chain only (alloy signer-local → elliptic-curve 0.13 pins 0.5.x), no upgrade path until alloy moves on" }]
 
 [licenses]
 confidence-threshold = 0.8

@@ -20,7 +20,8 @@
     "test": "vp run -r test && vp test",
     "release": "bumpp",
     "prepare": "vp config",
-    "vectors": "bun packages/erc8004/scripts/vectors/all.ts"
+    "vectors": "bun packages/erc8004/scripts/vectors/all.ts",
+    "abi": "bun scripts/abi.ts"
   },
   "devDependencies": {
     "@qntx/oxfmt": "1.1.1",

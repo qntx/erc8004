@@ -12,7 +12,11 @@ export {
   Erc8004Error,
   EventDecodeError,
   FeedbackValueError,
+  ClientGuardError,
+  ContractRevertError,
   JsonDocumentError,
+  MissingEventError,
+  ResolveError,
   UnsupportedChainError,
   formatAgentRegistry,
   parseAgentRegistry,
@@ -28,7 +32,9 @@ export type {
   AgentWalletDeadlineErrorCode,
   DataUriErrorCode,
   FeedbackValueErrorCode,
+  ClientGuardErrorCode,
   JsonObject,
+  ResolveErrorCode,
   RevertReason,
 } from "./core/index.ts";
 export { deployments, getDeployment } from "./deployments/index.ts";
@@ -65,3 +71,53 @@ export {
 export type { AgentWalletMessage } from "./identity/index.ts";
 export { createFeedbackFile, feedbackFileToJson, parseFeedbackFile } from "./reputation/index.ts";
 export type { FeedbackFile } from "./reputation/index.ts";
+export type { Agent } from "./identity/index.ts";
+export type { Feedback, FeedbackEntry } from "./reputation/index.ts";
+export type { ValidationStatus } from "./validation/index.ts";
+export { erc8004PublicActions, erc8004WalletActions } from "./actions.ts";
+export type { Erc8004ActionsOptions } from "./actions.ts";
+export {
+  getAgent,
+  getAgentOwner,
+  getAgentUri,
+  getAgentWallet,
+  getApproved,
+  getIdentityVersion,
+  getMetadata,
+  isApprovedForAll,
+  isAuthorizedOrOwner,
+  parseRegisteredAgentId,
+  registerAgent,
+  setAgentOperator,
+  setAgentUri,
+  setAgentWallet,
+  setMetadata,
+  signAgentWallet,
+  transferAgent,
+  unsetAgentWallet,
+  approveAgent,
+} from "./identity/index.ts";
+export {
+  appendResponse,
+  getClients,
+  getLastIndex,
+  getReputationSummary,
+  getReputationVersion,
+  getResponseCount,
+  giveFeedback,
+  parseFeedbackIndex,
+  readAllFeedback,
+  readFeedback,
+  revokeFeedback,
+} from "./reputation/index.ts";
+export {
+  getAgentValidations,
+  getValidationStatus,
+  getValidationSummary,
+  getValidationVersion,
+  getValidatorRequests,
+  requestValidation,
+  respondToValidation,
+} from "./validation/index.ts";
+export { checkEndpointDomain, resolveAgentUri } from "./registration/index.ts";
+export type { ResolveOptions } from "./registration/index.ts";

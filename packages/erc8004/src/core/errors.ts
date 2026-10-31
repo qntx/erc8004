@@ -1,3 +1,5 @@
+import type { RevertReason } from "./revert.ts";
+
 /**
  * Base error for all @qntx/erc8004 failures; `code` is the stable discriminator shared with the
  * Rust error variants.
@@ -6,8 +8,8 @@ export class Erc8004Error extends Error {
   override name = "Erc8004Error";
   readonly code: string;
 
-  constructor(code: string, message: string) {
-    super(message);
+  constructor(code: string, message: string, options?: { cause?: unknown }) {
+    super(message, options);
     this.code = code;
   }
 }
@@ -127,5 +129,65 @@ export class AgentWalletDeadlineError extends Erc8004Error {
   constructor(code: AgentWalletDeadlineErrorCode, message: string) {
     super(code, message);
     this.code = code;
+  }
+}
+
+/** A contract call reverted; `reason` is the decoded {@link RevertReason}. */
+export class ContractRevertError extends Erc8004Error {
+  override name = "ContractRevertError";
+  override readonly code = "ContractRevert";
+  readonly reason: RevertReason;
+
+  constructor(reason: RevertReason, options?: { cause?: unknown }) {
+    super("ContractRevert", `contract reverted: ${reason.reason}`, { cause: options?.cause });
+    this.reason = reason;
+  }
+}
+
+export type ClientGuardErrorCode =
+  | "ClientAddressesRequired"
+  | "MissingAccount"
+  | "ResponseOutOfRange"
+  | "ReservedMetadataKey"
+  | "EmptyResponseUri";
+
+/** A pre-flight guard tripped before any RPC call. */
+export class ClientGuardError extends Erc8004Error {
+  override name = "ClientGuardError";
+  override readonly code: ClientGuardErrorCode;
+
+  constructor(code: ClientGuardErrorCode, message: string) {
+    super(code, message);
+    this.code = code;
+  }
+}
+
+/** An expected event was absent from a transaction receipt's logs. */
+export class MissingEventError extends Erc8004Error {
+  override name = "MissingEventError";
+  override readonly code = "MissingEvent";
+
+  constructor(event: string) {
+    super("MissingEvent", `expected a ${event} event in the receipt logs`);
+  }
+}
+
+export type ResolveErrorCode =
+  | "NotSet"
+  | "UnsupportedScheme"
+  | "HttpStatus"
+  | "TooLarge"
+  | "InvalidJson";
+
+/** AgentURI resolution failure. */
+export class ResolveError extends Erc8004Error {
+  override name = "ResolveError";
+  override readonly code: ResolveErrorCode;
+  readonly status: number | undefined;
+
+  constructor(code: ResolveErrorCode, message: string, options?: { status?: number }) {
+    super(code, message);
+    this.code = code;
+    this.status = options?.status;
   }
 }

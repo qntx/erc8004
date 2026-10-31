@@ -12,3 +12,5 @@ export { decodeDataUri, encodeDataUri } from "./data-uri.ts";
 export { classifyAgentUri, DEFAULT_IPFS_GATEWAY } from "./agent-uri.ts";
 export type { AgentUri } from "./agent-uri.ts";
 export { verifyEndpointDomain, wellKnownRegistrationUrl } from "./domain.ts";
+export { checkEndpointDomain, resolveAgentUri } from "./resolve.ts";
+export type { ResolveOptions } from "./resolve.ts";

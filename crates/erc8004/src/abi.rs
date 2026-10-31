@@ -50,6 +50,15 @@ sol! {
         function setAgentWallet(uint256 agentId, address newWallet, uint256 deadline, bytes signature);
         function ownerOf(uint256 agentId) view returns (address);
         function tokenURI(uint256 agentId) view returns (string);
+        function getApproved(uint256 tokenId) view returns (address);
+        function approve(address to, uint256 tokenId);
+        function setApprovalForAll(address operator, bool approved);
+        function isApprovedForAll(address owner, address operator) view returns (bool);
+        function isAuthorizedOrOwner(address spender, uint256 agentId) view returns (bool);
+        function getMetadata(uint256 agentId, string metadataKey) view returns (bytes);
+        function setMetadata(uint256 agentId, string metadataKey, bytes metadataValue);
+        function transferFrom(address from, address to, uint256 tokenId);
+        function unsetAgentWallet(uint256 agentId);
     }
 
     /// Reputation Registry — events and functions.
@@ -66,6 +75,12 @@ sol! {
         function giveFeedback(uint256 agentId, int128 value, uint8 valueDecimals, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash);
         function revokeFeedback(uint256 agentId, uint64 feedbackIndex);
         function getSummary(uint256 agentId, address[] clientAddresses, string tag1, string tag2) view returns (uint64 count, int128 summaryValue, uint8 summaryValueDecimals);
+        function appendResponse(uint256 agentId, address clientAddress, uint64 feedbackIndex, string responseURI, bytes32 responseHash);
+        function readFeedback(uint256 agentId, address clientAddress, uint64 feedbackIndex) view returns (int128 value, uint8 valueDecimals, string tag1, string tag2, bool isRevoked);
+        function readAllFeedback(uint256 agentId, address[] clientAddresses, string tag1, string tag2, bool includeRevoked) view returns (address[] clients, uint64[] feedbackIndexes, int128[] values, uint8[] valueDecimals, string[] tag1s, string[] tag2s, bool[] revokedStatuses);
+        function getClients(uint256 agentId) view returns (address[]);
+        function getLastIndex(uint256 agentId, address clientAddress) view returns (uint64);
+        function getResponseCount(uint256 agentId, address clientAddress, uint64 feedbackIndex, address[] responders) view returns (uint64 count);
     }
 
     /// Validation Registry — events and functions.
@@ -79,6 +94,10 @@ sol! {
         function getIdentityRegistry() view returns (address);
         function validationRequest(address validatorAddress, uint256 agentId, string requestURI, bytes32 requestHash);
         function validationResponse(bytes32 requestHash, uint8 response, string responseURI, bytes32 responseHash, string tag);
+        function getValidationStatus(bytes32 requestHash) view returns (address validatorAddress, uint256 agentId, uint8 response, bytes32 responseHash, string tag, uint256 lastUpdate);
+        function getSummary(uint256 agentId, address[] validatorAddresses, string tag) view returns (uint64 count, uint8 avgResponse);
+        function getAgentValidations(uint256 agentId) view returns (bytes32[]);
+        function getValidatorRequests(address validatorAddress) view returns (bytes32[]);
     }
 }
 

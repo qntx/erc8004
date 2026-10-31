@@ -7,6 +7,10 @@
 //! `AgentWalletSet` EIP-712 message, the verified deployment table, and the
 //! shared error codes whose spellings match `@qntx/erc8004`.
 
+#![allow(
+    unused_crate_dependencies,
+    reason = "dev-dependencies (tokio, extra alloy features) are used only by test targets"
+)]
 #[allow(
     clippy::too_many_arguments,
     reason = "contract ABI signatures match upstream"
@@ -18,7 +22,13 @@ mod events;
 mod feedback;
 mod feedback_value;
 mod json;
+#[cfg(feature = "provider")]
+#[cfg(feature = "provider")]
+mod provider;
 mod registration;
+#[cfg(feature = "fetch")]
+#[cfg(feature = "fetch")]
+mod resolve;
 mod revert;
 mod wallet;
 
@@ -28,10 +38,17 @@ pub use events::{Event, EventDecodeError};
 pub use feedback::FeedbackFile;
 pub use feedback_value::{FeedbackValue, FeedbackValueError};
 pub use json::JsonDocumentError;
+#[cfg(feature = "provider")]
+pub use provider::{
+    Agent, Erc8004, Feedback, FeedbackEntry, Identity, MetadataEntry, ProviderError, Reputation,
+    ReputationSummary, TxOutcome, Validation, ValidationStatus, ValidationSummary,
+};
 pub use registration::agent_uri::{AgentUri, AgentUriError, DEFAULT_IPFS_GATEWAY};
 pub use registration::conformance::ConformanceIssue;
 pub use registration::data_uri::{DataUriError, decode_data_uri, encode_data_uri};
 pub use registration::domain::well_known_registration_url;
 pub use registration::file::{REGISTRATION_TYPE_V1, Registration, RegistrationFile, Service};
+#[cfg(feature = "fetch")]
+pub use resolve::{ResolveError, Resolver, ResolverOptions};
 pub use revert::RevertReason;
 pub use wallet::{AgentWalletDeadlineError, AgentWalletSet, check_agent_wallet_deadline};

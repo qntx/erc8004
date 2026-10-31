@@ -42,7 +42,34 @@ crates.io). npm and crate versions are lockstep.
   in its dependency tree.
 - `data/abis/` vendors the upstream `erc-8004-contracts` ABIs verbatim;
   `bun run gen` regenerates the TS ABI modules and deployment table from
-  `data/`.
+  `data/`. (Upstream's `IdentityRegistry.json` at `b9e466c` omits
+  `isAuthorizedOrOwner`, which exists in the contract source — the vendored
+  file adds that entry; see `data/SOURCE.md`.)
+- On-chain layer, both languages. TypeScript: viem-style action free
+  functions for the three registries (`identity`, `reputation`, and the new
+  `/validation` layer), contract-revert errors mapped to shared
+  `RevertReason`s via `ContractRevertError`, pre-RPC guards
+  (`ClientGuardError`: `ClientAddressesRequired`, `ResponseOutOfRange`,
+  `ReservedMetadataKey`, `EmptyResponseUri`, wallet-deadline checks against
+  the latest block), `signAgentWallet` and `parseRegisteredAgentId` /
+  `parseFeedbackIndex` receipt helpers, plus `erc8004PublicActions()` /
+  `erc8004WalletActions()` decorators for `client.extend()`. Rust: the
+  `provider` feature adds `Erc8004<P: Provider>` with `identity()` /
+  `reputation()` / `validation()` handles, `TxOutcome<T>` write results, and
+  `ProviderError` covering RPC, revert, receipt-status, missing-event and the
+  same client guards.
+- agentURI resolution, both languages. TypeScript `resolveAgentUri` /
+  `checkEndpointDomain` take an injected `fetch` (data/HTTPS/IPFS gateway,
+  1 MiB default body cap, `ResolveError` codes `NotSet` / `UnsupportedScheme`
+  / `HttpStatus` / `TooLarge` / `InvalidJson`). Rust `Resolver` /
+  `ResolverOptions` / `ResolveError` behind the `fetch` feature with a
+  streamed byte cap. `default = ["provider", "fetch"]`; `--no-default-features`
+  stays the pure sans-IO core.
+- `e2e/`: a Foundry project vendoring the upstream contracts at `b9e466c`
+  (soldeer: OpenZeppelin 5.4.0 + `forge-std` 1.9.4) with `Deploy.s.sol`
+  replicating the upstream proxy-upgrade deployment and `e2e/run.sh` driving
+  matching TypeScript (`tests/e2e/core.test.ts`, env-gated) and Rust
+  (`tests/e2e.rs`, `#[ignore]`) anvil suites over the same scenario.
 
 ### Removed
 

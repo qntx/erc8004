@@ -44,11 +44,27 @@ describe("parity check", () => {
     expect(errors).toStrictEqual(['capability "core.example": duplicate id']);
   });
 
-  test("rejects an empty vectors list", () => {
+  test("rejects an empty vectors list without e2e/unit tests on both sides", () => {
     const errors = checkParity([cap({ vectors: [] })], [], TRUE, CITES);
     expect(errors).toStrictEqual([
-      'capability "core.example": vectors must list at least one vector file',
+      'capability "core.example": vectors may be empty only when both ts.tests and rust.tests list an e2e or unit test file',
     ]);
+  });
+
+  test("accepts an empty vectors list with e2e/unit tests on both sides", () => {
+    const errors = checkParity(
+      [
+        cap({
+          vectors: [],
+          ts: { module: "src/x.ts", tests: ["tests/e2e/core.test.ts"] },
+          rust: { tests: ["tests/e2e.rs"] },
+        }),
+      ],
+      [],
+      TRUE,
+      CITES,
+    );
+    expect(errors).toStrictEqual([]);
   });
 
   test("rejects an empty ts.tests list", () => {

@@ -1,4 +1,4 @@
-import { decodeErrorResult, isAddress } from "viem";
+import { decodeErrorResult, parseAbi } from "viem";
 import type { Address, Hex } from "viem";
 
 import { identityRegistryAbi } from "../abi/index.ts";
@@ -61,112 +61,60 @@ const ERROR_STRINGS: Record<string, RevertReason> = {
   "resp>100": { reason: "ResponseOutOfRange" },
 };
 
-function argsByName(decoded: {
-  errorName: string;
-  args?: unknown;
-  abiItem?: { inputs?: ReadonlyArray<{ name?: string | undefined }> } | undefined;
-}): Record<string, unknown> {
-  const inputs = decoded.abiItem?.inputs ?? [];
-  const args = Array.isArray(decoded.args) ? decoded.args : [];
-  const out: Record<string, unknown> = {};
-  for (const [i, input] of inputs.entries()) {
-    if (input.name !== undefined) {
-      out[input.name] = args[i];
-    }
-  }
-  return out;
-}
-
-function arg(
-  decoded: {
-    errorName: string;
-    args?: unknown;
-    abiItem?: { inputs?: ReadonlyArray<{ name?: string | undefined }> } | undefined;
-  },
-  name: string,
-): unknown {
-  return argsByName(decoded)[name];
-}
+const errorAbi = [
+  ...identityRegistryAbi,
+  ...parseAbi(["error Error(string message)", "error Panic(uint256 code)"]),
+];
 
 /** Decodes revert data into one reason; never throws — undecodable payloads become `Unknown`. */
 export function decodeRevert(data: Hex): RevertReason {
-  let decoded: { errorName: string; args?: unknown };
+  let decoded;
   try {
-    decoded = decodeErrorResult({ abi: identityRegistryAbi, data });
+    decoded = decodeErrorResult({ abi: errorAbi, data });
   } catch {
     return { reason: "Unknown", data };
   }
   switch (decoded.errorName) {
     case "Error": {
-      const positional: unknown = Array.isArray(decoded.args)
-        ? decoded.args[0]
-        : arg(decoded, "message");
-      const message = typeof positional === "string" ? positional : "";
+      const [message] = decoded.args;
       return ERROR_STRINGS[message] ?? { reason: "Message", message };
     }
-    case "Panic": {
-      const positional: unknown = Array.isArray(decoded.args)
-        ? decoded.args[0]
-        : arg(decoded, "code");
-      return { reason: "Panic", code: typeof positional === "bigint" ? positional : 0n };
-    }
-    case "ERC721NonexistentToken": {
-      const agentId = arg(decoded, "tokenId");
-      return { reason: "AgentNotFound", agentId: typeof agentId === "bigint" ? agentId : 0n };
-    }
-    case "ERC721IncorrectOwner": {
-      const sender = arg(decoded, "sender");
-      const tokenId = arg(decoded, "tokenId");
-      const owner = arg(decoded, "owner");
-      if (
-        typeof sender === "string" &&
-        isAddress(sender) &&
-        typeof tokenId === "bigint" &&
-        typeof owner === "string" &&
-        isAddress(owner)
-      ) {
-        return { reason: "IncorrectOwner", sender, agentId: tokenId, owner };
-      }
-      return { reason: "Unknown", data };
-    }
-    case "ERC721InsufficientApproval": {
-      const operator = arg(decoded, "operator");
-      const tokenId = arg(decoded, "tokenId");
-      if (typeof operator === "string" && isAddress(operator) && typeof tokenId === "bigint") {
-        return { reason: "InsufficientApproval", operator, agentId: tokenId };
-      }
-      return { reason: "Unknown", data };
-    }
-    case "ERC721InvalidReceiver": {
-      const receiver = arg(decoded, "receiver");
-      return typeof receiver === "string" && isAddress(receiver)
-        ? { reason: "InvalidReceiver", receiver }
-        : { reason: "Unknown", data };
-    }
-    case "ERC721InvalidSender": {
-      const sender = arg(decoded, "sender");
-      return typeof sender === "string" && isAddress(sender)
-        ? { reason: "InvalidSender", sender }
-        : { reason: "Unknown", data };
-    }
-    case "ERC721InvalidOwner": {
-      const owner = arg(decoded, "owner");
-      return typeof owner === "string" && isAddress(owner)
-        ? { reason: "InvalidOwner", owner }
-        : { reason: "Unknown", data };
-    }
-    case "ERC721InvalidApprover": {
-      const approver = arg(decoded, "approver");
-      return typeof approver === "string" && isAddress(approver)
-        ? { reason: "InvalidApprover", approver }
-        : { reason: "Unknown", data };
-    }
-    case "ERC721InvalidOperator": {
-      const operator = arg(decoded, "operator");
-      return typeof operator === "string" && isAddress(operator)
-        ? { reason: "InvalidOperator", operator }
-        : { reason: "Unknown", data };
-    }
+    case "Panic":
+      return { reason: "Panic", code: decoded.args[0] };
+
+    case "ERC721NonexistentToken":
+      return { reason: "AgentNotFound", agentId: decoded.args[0] };
+
+    case "ERC721IncorrectOwner":
+      return {
+        reason: "IncorrectOwner",
+        sender: decoded.args[0],
+        agentId: decoded.args[1],
+        owner: decoded.args[2],
+      };
+
+    case "ERC721InsufficientApproval":
+      return {
+        reason: "InsufficientApproval",
+        operator: decoded.args[0],
+        agentId: decoded.args[1],
+      };
+
+    case "ERC721InvalidReceiver":
+      return { reason: "InvalidReceiver", receiver: decoded.args[0] };
+
+    case "ERC721InvalidSender":
+      return { reason: "InvalidSender", sender: decoded.args[0] };
+
+    case "ERC721InvalidOwner":
+      return { reason: "InvalidOwner", owner: decoded.args[0] };
+
+    case "ERC721InvalidApprover":
+      return { reason: "InvalidApprover", approver: decoded.args[0] };
+
+    case "ERC721InvalidOperator":
+      return { reason: "InvalidOperator", operator: decoded.args[0] };
+
     default:
       return { reason: "Unknown", data };
   }
