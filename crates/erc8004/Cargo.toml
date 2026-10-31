@@ -12,7 +12,7 @@ keywords.workspace     = true
 categories             = ["cryptography::cryptocurrencies", "api-bindings"]
 readme                 = "README.md"
 documentation          = "https://docs.rs/erc8004"
-include                = ["src/**/*", "Cargo.toml", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
+include                = ["src/**/*", "examples/**/*", "Cargo.toml", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
 
 [package.metadata.docs.rs]
 all-features = true
@@ -34,6 +34,14 @@ thiserror.workspace  = true
 alloy                = { workspace = true, features = ["json-abi", "provider-http", "signer-local", "reqwest", "reqwest-rustls-tls"] }
 serde_json.workspace = true
 tokio                = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
+
+[[example]]
+name              = "query_agent"
+required-features = ["provider", "fetch"]
+
+[[example]]
+name              = "give_feedback"
+required-features = ["provider"]
 
 [[test]]
 name              = "e2e"

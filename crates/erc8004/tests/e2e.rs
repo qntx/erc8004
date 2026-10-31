@@ -19,8 +19,8 @@ use alloy::providers::{Provider, ProviderBuilder};
 use alloy::signers::Signer as _;
 use alloy::signers::local::PrivateKeySigner;
 use erc8004::{
-    AgentWalletDeadlineError, AgentWalletSet, Erc8004, FeedbackValue, MetadataEntry, ProviderError,
-    RevertReason,
+    AgentWalletDeadlineError, AgentWalletSet, Erc8004, FeedbackFilter, FeedbackValue,
+    MetadataEntry, NewFeedback, ProviderError, RevertReason, ValidationResponse,
 };
 
 // anvil default accounts: #0 owner, #1 client, #2 validator, #3 new wallet
@@ -244,7 +244,11 @@ mod tests {
         let value: FeedbackValue = "87.50".parse().expect("feedback value");
         let fb = erc1
             .reputation()
-            .give_feedback(agent_id, value, "quality", "speed", "", "", B256::ZERO)
+            .give_feedback(
+                &NewFeedback::new(agent_id, value)
+                    .tag1("quality")
+                    .tag2("speed"),
+            )
             .await
             .expect("give_feedback");
         assert_eq!(fb.value, 1);
@@ -252,7 +256,7 @@ mod tests {
         // self-feedback → revert
         let err = erc0
             .reputation()
-            .give_feedback(agent_id, value, "", "", "", "", B256::ZERO)
+            .give_feedback(&NewFeedback::new(agent_id, value))
             .await
             .unwrap_err();
         assert!(matches!(
@@ -272,7 +276,7 @@ mod tests {
 
         let all = erc1
             .reputation()
-            .read_all_feedback(agent_id, &[addr(1)], "", "", false)
+            .read_all_feedback(agent_id, &FeedbackFilter::new(vec![addr(1)]), false)
             .await
             .expect("read_all_feedback");
         assert_eq!(all.len(), 1);
@@ -280,7 +284,7 @@ mod tests {
 
         let summary = erc1
             .reputation()
-            .get_reputation_summary(agent_id, &[addr(1)], "", "")
+            .get_reputation_summary(agent_id, &FeedbackFilter::new(vec![addr(1)]))
             .await
             .expect("summary");
         assert_eq!(summary.count, 1);
@@ -289,7 +293,7 @@ mod tests {
         // empty clients → guard
         let err2 = erc1
             .reputation()
-            .get_reputation_summary(agent_id, &[], "", "")
+            .get_reputation_summary(agent_id, &FeedbackFilter::default())
             .await
             .unwrap_err();
         assert!(matches!(err2, ProviderError::ClientAddressesRequired));
@@ -300,7 +304,7 @@ mod tests {
             .expect("append_response");
         let count = erc1
             .reputation()
-            .get_response_count(agent_id, Some(addr(1)), Some(fb.value), Some(vec![addr(1)]))
+            .get_response_count(agent_id, Some(addr(1)), Some(fb.value), &[addr(1)])
             .await
             .expect("get_response_count");
         assert_eq!(count, 1);
@@ -350,7 +354,7 @@ mod tests {
         // out-of-range → guard (101 > 100)
         let err = erc2
             .validation()
-            .respond_to_validation(request_hash, 101, "", B256::ZERO, "")
+            .respond_to_validation(&ValidationResponse::new(request_hash, 101))
             .await
             .unwrap_err();
         assert!(matches!(err, ProviderError::ResponseOutOfRange));
@@ -358,7 +362,7 @@ mod tests {
         // wrong responder → revert NotValidator
         let err2 = erc1
             .validation()
-            .respond_to_validation(request_hash, 50, "", B256::ZERO, "")
+            .respond_to_validation(&ValidationResponse::new(request_hash, 50))
             .await
             .unwrap_err();
         assert!(matches!(
@@ -367,7 +371,7 @@ mod tests {
         ));
 
         erc2.validation()
-            .respond_to_validation(request_hash, 100, "", B256::ZERO, "hard")
+            .respond_to_validation(&ValidationResponse::new(request_hash, 100).tag("hard"))
             .await
             .expect("respond_to_validation");
         let status = erc0

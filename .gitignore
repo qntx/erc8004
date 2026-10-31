@@ -13,9 +13,6 @@ dist
 !.env.example
 
 # Internal documentation (kept locally, not published)
-docs/*
-!docs/index.mdx
-!docs/meta.json
 
 # Rust build output (the parity streams also generate under target/)
 target/

@@ -1,0 +1,61 @@
+---
+title: Protocol
+description: ERC-8004 registries, identifiers, files and signatures.
+---
+
+ERC-8004 ([EIP-8004](https://eips.ethereum.org/EIPS/eip-8004)) deploys one
+identity, reputation and validation registry per chain. Agents are ERC-721
+tokens on the identity registry; `agentId` is the token id. Agents are
+identified off-chain by an `agentRegistry` handle in `eip155:{chainId}:{address}`
+form (see `AgentRegistry`).
+
+## Registries
+
+- **IdentityRegistry** — `register`, `setAgentUri`, metadata key/value slots,
+  the `agentWallet` reserved key, ERC-721 transfer/approval surface and
+  `isAuthorizedOrOwner`.
+- **ReputationRegistry** — `giveFeedback(agentId, value, valueDecimals, tag1,
+tag2, endpoint, feedbackUri, feedbackHash)`, `revokeFeedback`,
+  `appendResponse`, summaries and client/index queries.
+- **ValidationRegistry** — `validationRequest(validator, agentId, requestUri,
+requestHash)` and `validationResponse(requestHash, response, responseUri,
+responseHash, tag)`.
+
+## Feedback values
+
+`value` is an `int128` magnitude paired with `valueDecimals` (`0..=18`), so the
+on-chain score is `value * 10^-decimals`. `FeedbackValue` keeps the pair
+canonical: decimal strings like `"87.50"` parse to `(8750, 2)` and format back
+to `"87.5"`. Bounds are enforced at construction (`|value| ≤ 1e38`).
+
+## Registration and feedback files
+
+`agentURI` resolves to a **registration file** (name, description, services,
+`registrations[]` binding `agentId` to its `agentRegistry`, trust models).
+`feedbackUri` resolves to a **feedback file** (agent registry/id, client,
+timestamp, the `FeedbackValue`, tags and optional `mcp`/`a2a`/`oasf`/
+`proofOfPayment` metadata). Both file models are lenient: unknown keys are
+preserved verbatim, and spec keys are typed when present.
+
+## agentURI resolution
+
+`agentURI` may be `data:application/json;base64,…`, an `https:` URL, or an
+`ipfs://` CID (resolved through a configurable gateway, default
+`https://ipfs.io/ipfs/`). Resolution enforces a byte cap (default 1 MiB) against
+both the declared `content-length` and the actual body before parsing JSON into
+a `RegistrationFile`.
+
+## Endpoint-domain verification
+
+`checkEndpointDomain` / `Resolver::check_endpoint_domain` fetches
+`{endpoint}/.well-known/agent-registration.json`, parses it and checks that the
+endpoint's domain is claimed by the registration file of the given
+`agentRegistry`/`agentId`.
+
+## AgentWalletSet
+
+Setting `agentWallet` requires the _new wallet's_ EIP-712 signature over
+`AgentWalletSet { agentId, newWallet, owner, deadline }` in the identity
+registry's domain (name `AgentWallet`, version `1`). Deadlines are checked
+client-side against the latest block timestamp: expired → `DeadlineExpired`,
+further than five minutes ahead → `DeadlineTooFar`.

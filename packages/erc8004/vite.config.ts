@@ -23,6 +23,11 @@ const config: UserConfig = defineConfig({
       abi: "src/abi/index.ts",
       core: "src/core/index.ts",
       deployments: "src/deployments/index.ts",
+      events: "src/events/index.ts",
+      identity: "src/identity/index.ts",
+      registration: "src/registration/index.ts",
+      reputation: "src/reputation/index.ts",
+      validation: "src/validation/index.ts",
     },
     dts: {
       generator: "tsgo",

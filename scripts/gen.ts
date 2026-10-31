@@ -138,6 +138,43 @@ function deploymentsModule(): GeneratedFile {
   };
 }
 
+function deploymentsDocs(): GeneratedFile {
+  const data = readData("deployments.json");
+  const raw = isRecord(data) ? data["deployments"] : undefined;
+  const deployments = Array.isArray(raw) ? raw.filter(isDeployment) : [];
+  if (!Array.isArray(raw) || deployments.length !== raw.length) {
+    throw new Error("data/deployments.json: deployments must be an array of Deployment objects");
+  }
+  const rows = deployments
+    .map(
+      (d) =>
+        `| ${d.name} | ${d.id} | ${d.chainId} | ${d.testnet ? "yes" : "no"} | ` +
+        `\`${d.identityRegistry}\` | \`${d.reputationRegistry}\` | \`${d.validationRegistry}\` |`,
+    )
+    .join("\n");
+  const table =
+    `| Network | Deployment id | Chain id | Testnet | Identity | Reputation | Validation |\n` +
+    `| ------- | ------------- | -------- | ------- | -------- | ---------- | ---------- |\n${
+      rows
+    }`;
+  const path = "docs/deployments.mdx";
+  const current = readFileSync(join(ROOT, path), "utf8");
+  const start = "<!-- gen:deployments:start -->";
+  const end = "<!-- gen:deployments:end -->";
+  const [before, rest] = current.split(start);
+  if (before === undefined || rest === undefined) {
+    throw new Error(`${path}: missing ${start} marker`);
+  }
+  const [, after] = rest.split(end);
+  if (after === undefined) {
+    throw new Error(`${path}: missing ${end} marker`);
+  }
+  return {
+    path,
+    content: `${before}${start}\n${table}\n${end}${after}`,
+  };
+}
+
 function screamingSnake(id: string): string {
   return id.replaceAll("-", "_").toUpperCase();
 }
@@ -187,7 +224,7 @@ pub const ${screamingSnake(d.id)}: Deployment = Deployment {
   };
 }
 
-// TypeScript files go through `vp fmt`, Rust through `rustfmt --edition 2024`
+// TypeScript and MDX files go through `vp fmt`, Rust through `rustfmt --edition 2024`
 // on stdin, so generated output is already formatted and `bun run gen --check`
 // agrees with `vp check` / `cargo fmt --check`.
 function format(path: string, content: string): string {
@@ -207,7 +244,7 @@ function format(path: string, content: string): string {
     }
     return out.stdout;
   }
-  if (!path.endsWith(".ts")) {
+  if (!path.endsWith(".ts") && !path.endsWith(".mdx")) {
     return content;
   }
   const out = spawnSync("vp", ["fmt", `--stdin-filepath=${path}`], {
@@ -223,7 +260,12 @@ function format(path: string, content: string): string {
 }
 
 if (import.meta.main) {
-  const targets: GeneratedFile[] = [...abiModules(), deploymentsModule(), rustDeploymentsModule()];
+  const targets: GeneratedFile[] = [
+    ...abiModules(),
+    deploymentsModule(),
+    rustDeploymentsModule(),
+    deploymentsDocs(),
+  ];
   let drift = false;
   for (const { path, content } of targets) {
     const formatted = format(path, content);

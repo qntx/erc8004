@@ -1,4 +1,4 @@
-//! agentURI classification — pure; fetching is a later phase.
+//! agentURI classification — pure; fetching lives in `resolve.rs` (`fetch` feature).
 
 use thiserror::Error;
 

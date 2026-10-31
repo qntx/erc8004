@@ -137,7 +137,11 @@ impl std::fmt::Display for RevertReason {
             Self::ResponseOutOfRange => write!(f, "response out of range"),
             Self::Message { message } => write!(f, "revert: {message}"),
             Self::AgentNotFound { agent_id } => write!(f, "agent {agent_id} not found"),
-            Self::IncorrectOwner { sender, agent_id, owner } => write!(
+            Self::IncorrectOwner {
+                sender,
+                agent_id,
+                owner,
+            } => write!(
                 f,
                 "incorrect owner: {sender} does not own agent {agent_id} (owner {owner})"
             ),
@@ -159,9 +163,10 @@ fn hex_encode(data: &[u8]) -> String {
     let mut out = String::with_capacity(data.len() * 2);
     for &b in data {
         // both nibbles are < 16 so from_digit always yields a char
-        if let (Some(hi), Some(lo)) =
-            (char::from_digit(u32::from(b >> 4), 16), char::from_digit(u32::from(b & 0x0f), 16))
-        {
+        if let (Some(hi), Some(lo)) = (
+            char::from_digit(u32::from(b >> 4), 16),
+            char::from_digit(u32::from(b & 0x0f), 16),
+        ) {
             out.push(hi);
             out.push(lo);
         }

@@ -21,8 +21,10 @@ use alloy::sol_types::SolCall;
 use crate::deployments::Deployment;
 
 pub use identity::{Agent, Identity, MetadataEntry};
-pub use reputation::{Feedback, FeedbackEntry, Reputation, ReputationSummary};
-pub use validation::{Validation, ValidationStatus, ValidationSummary};
+pub use reputation::{
+    Feedback, FeedbackEntry, FeedbackFilter, NewFeedback, Reputation, ReputationSummary,
+};
+pub use validation::{Validation, ValidationResponse, ValidationStatus, ValidationSummary};
 
 /// A mined write: the transaction hash plus the value parsed from its receipt.
 #[derive(Debug, Clone, PartialEq, Eq)]

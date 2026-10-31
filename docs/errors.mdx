@@ -1,0 +1,75 @@
+---
+title: Errors
+description: Shared error model — TypeScript classes and Rust enums use the same codes.
+---
+
+TypeScript throws `Erc8004Error` subclasses carrying a stable `code`; Rust
+returns `#[non_exhaustive]` error enums with the same `code()` strings. Codes
+are one-to-one across languages, so callers on either side can match on a
+single vocabulary. Rust enums are non-exhaustive — match with a wildcard arm.
+
+| Code                      | TypeScript                 | Rust                       | Meaning                                               |
+| ------------------------- | -------------------------- | -------------------------- | ----------------------------------------------------- | ----- | ------- |
+| `Malformed`               | `AgentRegistryError`       | `AgentRegistryError`       | `eip155:{chain}:{addr}` does not parse                |
+| `UnsupportedNamespace`    | `AgentRegistryError`       | `AgentRegistryError`       | Namespace is not `eip155`                             |
+| `InvalidChainId`          | `AgentRegistryError`       | `AgentRegistryError`       | Chain id segment is not a non-negative integer        |
+| `InvalidAddress`          | `AgentRegistryError`       | `AgentRegistryError`       | Address segment malformed or bad length               |
+| `BadChecksum`             | `AgentRegistryError`       | `AgentRegistryError`       | EIP-55 checksum mismatch                              |
+| `InvalidDecimalString`    | `FeedbackValueError`       | `FeedbackValueError`       | Not `-?[0-9]+(\.[0-9]+)?`                             |
+| `TooManyDecimals`         | `FeedbackValueError`       | `FeedbackValueError`       | `decimals > 18`                                       |
+| `ValueOutOfRange`         | `FeedbackValueError`       | `FeedbackValueError`       | `                                                     | value | > 1e38` |
+| `InvalidDecimals`         | `FeedbackValueError`       | `FeedbackValueError`       | Fraction digits disagree with `decimals`              |
+| `NotDataUri`              | `DataUriError`             | `DataUriError`             | Missing `data:` prefix                                |
+| `UnsupportedMediaType`    | `DataUriError`             | `DataUriError`             | Not `application/json`                                |
+| `NotBase64`               | `DataUriError`             | `DataUriError`             | `;base64` flag absent                                 |
+| `InvalidBase64`           | `DataUriError`             | `DataUriError`             | Base64 body does not decode                           |
+| `InvalidGateway`          | `AgentUriError`            | `AgentUriError`            | IPFS gateway string is not a valid URL                |
+| `NotAnObject`             | `JsonDocumentError`        | `JsonDocumentError`        | Document is not a JSON object                         |
+| `InvalidField`            | `JsonDocumentError`        | `JsonDocumentError`        | Field missing, wrong type or out of range             |
+| `MalformedLog`            | `EventDecodeError`         | `EventDecodeError`         | Protocol event with malformed topics/data             |
+| `DeadlineExpired`         | `AgentWalletDeadlineError` | `AgentWalletDeadlineError` | Signature deadline is in the past                     |
+| `DeadlineTooFar`          | `AgentWalletDeadlineError` | `AgentWalletDeadlineError` | Deadline more than five minutes ahead                 |
+| `UnsupportedChain`        | `UnsupportedChainError`    | —                          | Chain id not in the verified deployment table         |
+| `ContractRevert`          | `ContractRevertError`      | `ProviderError::Revert`    | Contract call reverted; `reason`/`RevertReason` below |
+| `ClientAddressesRequired` | `ClientGuardError`         | `ProviderError`            | Reputation summary needs ≥1 client address            |
+| `MissingAccount`          | `ClientGuardError`         | —                          | Write with no account on args or the wallet client    |
+| `ResponseOutOfRange`      | `ClientGuardError`         | `ProviderError`            | Validation response not an integer in `0..=100`       |
+| `ReservedMetadataKey`     | `ClientGuardError`         | `ProviderError`            | `agentWallet` is a reserved metadata key              |
+| `EmptyResponseUri`        | `ClientGuardError`         | `ProviderError`            | `appendResponse` requires a non-empty URI             |
+| `MissingEvent`            | `MissingEventError`        | `ProviderError`            | Expected event absent from the receipt                |
+| `NotSet`                  | `ResolveError`             | `ResolveError`             | `agentURI` is empty                                   |
+| `UnsupportedScheme`       | `ResolveError`             | `ResolveError`             | agentURI scheme is not `data:`/`https:`/`ipfs:`       |
+| `HttpStatus`              | `ResolveError`             | `ResolveError`             | Fetch returned a non-2xx status                       |
+| `TooLarge`                | `ResolveError`             | `ResolveError`             | Body exceeds `maxBytes`                               |
+| `InvalidJson`             | `ResolveError`             | `ResolveError`             | Body is not valid JSON                                |
+| `Transport`               | —                          | `ResolveError`             | Transport failure (Rust fetch only)                   |
+| `Rpc`                     | —                          | `ProviderError`            | Non-revert RPC failure, boxed opaque source           |
+| `TransactionFailed`       | —                          | `ProviderError`            | Receipt status is failure                             |
+| `InvalidResponse`         | —                          | `ProviderError`            | On-chain value outside SDK bounds                     |
+
+## Revert reasons
+
+Contract reverts decode into the shared `RevertReason` enum
+(`ContractRevertError.reason` / `ProviderError::Revert`). `Error(string)`
+becomes `Revert(message)`, `Panic(code)` becomes `Panic(code)`, the registry
+custom errors map to named variants, and unrecognised data stays raw as
+`Unknown(data)`.
+
+| RevertReason       | Contract error       |
+| ------------------ | -------------------- |
+| `SelfFeedback`     | `SelfFeedback()`     |
+| `AlreadyRevoked`   | `AlreadyRevoked()`   |
+| `AgentNotFound`    | `AgentNotFound()`    |
+| `RequestNotFound`  | `RequestNotFound()`  |
+| `NotValidator`     | `NotValidator()`     |
+| `InvalidResponse`  | `InvalidResponse()`  |
+| `Unauthorized`     | `Unauthorized()`     |
+| `InvalidDeadline`  | `InvalidDeadline()`  |
+| `InvalidSignature` | `InvalidSignature()` |
+| `BadWallet`        | `BadWallet()`        |
+| `InvalidVersion`   | `InvalidVersion()`   |
+| `RequestExists`    | `RequestExists()`    |
+| `UnknownRequest`   | `UnknownRequest()`   |
+| `Revert(message)`  | `Error(string)`      |
+| `Panic(code)`      | `Panic(uint256)`     |
+| `Unknown(data)`    | anything else        |

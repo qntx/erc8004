@@ -50,6 +50,31 @@
       "import": "./dist/deployments.mjs",
       "default": "./dist/deployments.mjs"
     },
+    "./events": {
+      "types": "./dist/events.d.mts",
+      "import": "./dist/events.mjs",
+      "default": "./dist/events.mjs"
+    },
+    "./identity": {
+      "types": "./dist/identity.d.mts",
+      "import": "./dist/identity.mjs",
+      "default": "./dist/identity.mjs"
+    },
+    "./registration": {
+      "types": "./dist/registration.d.mts",
+      "import": "./dist/registration.mjs",
+      "default": "./dist/registration.mjs"
+    },
+    "./reputation": {
+      "types": "./dist/reputation.d.mts",
+      "import": "./dist/reputation.mjs",
+      "default": "./dist/reputation.mjs"
+    },
+    "./validation": {
+      "types": "./dist/validation.d.mts",
+      "import": "./dist/validation.mjs",
+      "default": "./dist/validation.mjs"
+    },
     "./package.json": "./package.json"
   },
   "publishConfig": {

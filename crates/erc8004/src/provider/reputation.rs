@@ -52,6 +52,116 @@ pub struct ReputationSummary {
     pub value: FeedbackValue,
 }
 
+/// `giveFeedback` request — required fields in [`NewFeedback::new`], optional
+/// fields via `#[must_use]` chainable setters.
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
+pub struct NewFeedback {
+    /// The agent receiving feedback.
+    pub agent_id: U256,
+    /// The `(value, valueDecimals)` score.
+    pub value: FeedbackValue,
+    /// Optional primary tag.
+    pub tag1: String,
+    /// Optional secondary tag.
+    pub tag2: String,
+    /// Optional endpoint the feedback refers to.
+    pub endpoint: String,
+    /// Optional off-chain feedback-file URI.
+    pub feedback_uri: String,
+    /// Optional hash of the feedback file.
+    pub feedback_hash: B256,
+}
+
+impl NewFeedback {
+    /// Builds a request with the required fields; optionals default to empty/`ZERO`.
+    #[must_use]
+    pub const fn new(agent_id: U256, value: FeedbackValue) -> Self {
+        Self {
+            agent_id,
+            value,
+            tag1: String::new(),
+            tag2: String::new(),
+            endpoint: String::new(),
+            feedback_uri: String::new(),
+            feedback_hash: B256::ZERO,
+        }
+    }
+
+    /// Sets the primary tag.
+    #[must_use]
+    pub fn tag1(mut self, tag1: impl Into<String>) -> Self {
+        self.tag1 = tag1.into();
+        self
+    }
+
+    /// Sets the secondary tag.
+    #[must_use]
+    pub fn tag2(mut self, tag2: impl Into<String>) -> Self {
+        self.tag2 = tag2.into();
+        self
+    }
+
+    /// Sets the endpoint the feedback refers to.
+    #[must_use]
+    pub fn endpoint(mut self, endpoint: impl Into<String>) -> Self {
+        self.endpoint = endpoint.into();
+        self
+    }
+
+    /// Sets the off-chain feedback-file URI.
+    #[must_use]
+    pub fn feedback_uri(mut self, feedback_uri: impl Into<String>) -> Self {
+        self.feedback_uri = feedback_uri.into();
+        self
+    }
+
+    /// Sets the feedback-file hash.
+    #[must_use]
+    pub const fn feedback_hash(mut self, feedback_hash: B256) -> Self {
+        self.feedback_hash = feedback_hash;
+        self
+    }
+}
+
+/// Client/tag filter shared by `readAllFeedback` and `getSummary` — empty
+/// `clients` means every client (the contract's semantics); `getSummary`
+/// additionally requires a non-empty list.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[non_exhaustive]
+pub struct FeedbackFilter {
+    /// Clients to filter by; empty matches every client.
+    pub clients: Vec<Address>,
+    /// Optional primary tag filter.
+    pub tag1: String,
+    /// Optional secondary tag filter.
+    pub tag2: String,
+}
+
+impl FeedbackFilter {
+    /// Filters to specific clients; `FeedbackFilter::default()` matches every client.
+    pub fn new(clients: impl Into<Vec<Address>>) -> Self {
+        Self {
+            clients: clients.into(),
+            ..Self::default()
+        }
+    }
+
+    /// Sets the primary tag filter.
+    #[must_use]
+    pub fn tag1(mut self, tag1: impl Into<String>) -> Self {
+        self.tag1 = tag1.into();
+        self
+    }
+
+    /// Sets the secondary tag filter.
+    #[must_use]
+    pub fn tag2(mut self, tag2: impl Into<String>) -> Self {
+        self.tag2 = tag2.into();
+        self
+    }
+}
+
 /// Reputation-registry handle borrowed from [`Erc8004`].
 #[derive(Debug)]
 pub struct Reputation<'a, P> {
@@ -119,17 +229,15 @@ impl<'a, P: Provider> Reputation<'a, P> {
     pub async fn read_all_feedback(
         &self,
         agent_id: U256,
-        clients: &[Address],
-        tag1: &str,
-        tag2: &str,
+        filter: &FeedbackFilter,
         include_revoked: bool,
     ) -> Result<Vec<FeedbackEntry>, ProviderError> {
         let result = self
             .call(IReputationRegistry::readAllFeedbackCall {
                 agentId: agent_id,
-                clientAddresses: clients.to_vec(),
-                tag1: tag1.into(),
-                tag2: tag2.into(),
+                clientAddresses: filter.clients.clone(),
+                tag1: filter.tag1.clone(),
+                tag2: filter.tag2.clone(),
                 includeRevoked: include_revoked,
             })
             .await?;
@@ -157,7 +265,7 @@ impl<'a, P: Provider> Reputation<'a, P> {
         Ok(out)
     }
 
-    /// `getSummary` — `clients` must be non-empty.
+    /// `getSummary` — `filter.clients` must be non-empty.
     ///
     /// # Errors
     ///
@@ -166,19 +274,17 @@ impl<'a, P: Provider> Reputation<'a, P> {
     pub async fn get_reputation_summary(
         &self,
         agent_id: U256,
-        clients: &[Address],
-        tag1: &str,
-        tag2: &str,
+        filter: &FeedbackFilter,
     ) -> Result<ReputationSummary, ProviderError> {
-        if clients.is_empty() {
+        if filter.clients.is_empty() {
             return Err(ProviderError::ClientAddressesRequired);
         }
         let result = self
             .call(IReputationRegistry::getSummaryCall {
                 agentId: agent_id,
-                clientAddresses: clients.to_vec(),
-                tag1: tag1.into(),
-                tag2: tag2.into(),
+                clientAddresses: filter.clients.clone(),
+                tag1: filter.tag1.clone(),
+                tag2: filter.tag2.clone(),
             })
             .await?;
         let count = result.count;
@@ -224,13 +330,13 @@ impl<'a, P: Provider> Reputation<'a, P> {
         agent_id: U256,
         client: Option<Address>,
         feedback_index: Option<u64>,
-        responders: Option<Vec<Address>>,
+        responders: &[Address],
     ) -> Result<u64, ProviderError> {
         self.call(IReputationRegistry::getResponseCountCall {
             agentId: agent_id,
             clientAddress: client.unwrap_or(Address::ZERO),
             feedbackIndex: feedback_index.unwrap_or(0),
-            responders: responders.unwrap_or_default(),
+            responders: responders.to_vec(),
         })
         .await
     }
@@ -245,10 +351,6 @@ impl<'a, P: Provider> Reputation<'a, P> {
     }
 
     /// `giveFeedback` — the index comes from the receipt's `NewFeedback` event.
-    #[allow(
-        clippy::too_many_arguments,
-        reason = "contract ABI signature matches upstream"
-    )]
     ///
     /// # Errors
     ///
@@ -256,24 +358,18 @@ impl<'a, P: Provider> Reputation<'a, P> {
     /// [`ProviderError::MissingEvent`] when `NewFeedback` is absent.
     pub async fn give_feedback(
         &self,
-        agent_id: U256,
-        value: FeedbackValue,
-        tag1: &str,
-        tag2: &str,
-        endpoint: &str,
-        feedback_uri: &str,
-        feedback_hash: B256,
+        feedback: &NewFeedback,
     ) -> Result<TxOutcome<u64>, ProviderError> {
         let receipt = self
             .send(IReputationRegistry::giveFeedbackCall {
-                agentId: agent_id,
-                value: value.value(),
-                valueDecimals: value.decimals(),
-                tag1: tag1.into(),
-                tag2: tag2.into(),
-                endpoint: endpoint.into(),
-                feedbackURI: feedback_uri.into(),
-                feedbackHash: feedback_hash,
+                agentId: feedback.agent_id,
+                value: feedback.value.value(),
+                valueDecimals: feedback.value.decimals(),
+                tag1: feedback.tag1.clone(),
+                tag2: feedback.tag2.clone(),
+                endpoint: feedback.endpoint.clone(),
+                feedbackURI: feedback.feedback_uri.clone(),
+                feedbackHash: feedback.feedback_hash,
             })
             .await?;
         let index = parse_feedback_index(&receipt)?;

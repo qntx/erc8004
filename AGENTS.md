@@ -59,6 +59,9 @@ bun run lint && bun run typecheck && bun run test   # lint includes taplo,
                                                     # version, layer and
                                                     # parity checks
 bun run build && bun run --cwd packages/erc8004 check:pkg
+bun run abi --check                                 # data/abis derived from the
+                                                    # vendored contracts via
+                                                    # forge inspect
 taplo fmt --check
 cargo fmt --all --check
 cargo clippy -p erc8004 --all-targets --all-features -- -D warnings

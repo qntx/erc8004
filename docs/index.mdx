@@ -1,6 +1,36 @@
 ---
 title: erc8004
-description: Documentation stub.
+description: ERC-8004 Trustless Agents for TypeScript and Rust.
 ---
 
-Documentation stub.
+[ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) _Trustless Agents_ defines
+three singleton registries — **Identity** (ERC-721 agent tokens with metadata,
+wallet and `agentURI`), **Reputation** (signed feedback, revocation and
+responses) and **Validation** (third-party validation requests and responses).
+This SDK implements the protocol layer in TypeScript and Rust with one shared
+test-vector set: the same files drive both implementations and `parity.json`
+tracks feature coverage.
+
+## Packages
+
+| Package         | Registry  | Language   |
+| --------------- | --------- | ---------- |
+| `@qntx/erc8004` | npm       | TypeScript |
+| `erc8004`       | crates.io | Rust       |
+
+## Layers
+
+| Layer       | Contents                                                                                           | TypeScript                                    | Rust                              |
+| ----------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------- | --------------------------------- |
+| Core        | AgentRegistry (`eip155:{chain}:{addr}`), FeedbackValue, data URIs, revert decoding, event decoding | `@qntx/erc8004`                               | `erc8004` root exports            |
+| Files       | Registration file + feedback file models, conformance, AgentWalletSet EIP-712                      | `@qntx/erc8004`                               | `erc8004` root exports            |
+| Deployments | Verified on-chain addresses                                                                        | `@qntx/erc8004/deployments`                   | `erc8004::deployments`            |
+| On-chain    | Registry reads/writes, revert mapping, client-side guards                                          | `erc8004PublicActions`/`erc8004WalletActions` | `Erc8004<P>` (`provider` feature) |
+| Resolution  | agentURI → registration file (`data:`/HTTPS/IPFS), endpoint-domain checks                          | `resolveAgentUri`/`checkEndpointDomain`       | `Resolver` (`fetch` feature)      |
+
+## Conformance
+
+Both implementations decode the same ABI events and contract errors into the
+same `Event`/`RevertReason` types, share `vectors/` fixtures, and are covered
+end-to-end by the Foundry/anvil suite in `e2e/` that runs the identical
+scenario in each language.

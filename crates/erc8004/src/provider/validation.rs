@@ -37,6 +37,58 @@ pub struct ValidationSummary {
     pub average_response: u8,
 }
 
+/// `validationResponse` request — required fields in [`ValidationResponse::new`],
+/// optional fields via `#[must_use]` chainable setters.
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
+pub struct ValidationResponse {
+    /// The request being answered.
+    pub request_hash: B256,
+    /// The response score (`0..=100`).
+    pub response: u8,
+    /// Optional off-chain response URI.
+    pub response_uri: String,
+    /// Optional response hash.
+    pub response_hash: B256,
+    /// Optional tag.
+    pub tag: String,
+}
+
+impl ValidationResponse {
+    /// Builds a request with the required fields; optionals default to empty/`ZERO`.
+    #[must_use]
+    pub const fn new(request_hash: B256, response: u8) -> Self {
+        Self {
+            request_hash,
+            response,
+            response_uri: String::new(),
+            response_hash: B256::ZERO,
+            tag: String::new(),
+        }
+    }
+
+    /// Sets the off-chain response URI.
+    #[must_use]
+    pub fn response_uri(mut self, response_uri: impl Into<String>) -> Self {
+        self.response_uri = response_uri.into();
+        self
+    }
+
+    /// Sets the response hash.
+    #[must_use]
+    pub const fn response_hash(mut self, response_hash: B256) -> Self {
+        self.response_hash = response_hash;
+        self
+    }
+
+    /// Sets the tag.
+    #[must_use]
+    pub fn tag(mut self, tag: impl Into<String>) -> Self {
+        self.tag = tag.into();
+        self
+    }
+}
+
 /// Validation-registry handle borrowed from [`Erc8004`].
 #[derive(Debug)]
 pub struct Validation<'a, P> {
@@ -187,22 +239,18 @@ impl<'a, P: Provider> Validation<'a, P> {
     /// contract reverts (e.g. [`RevertReason::NotValidator`]).
     pub async fn respond_to_validation(
         &self,
-        request_hash: B256,
-        response: u8,
-        response_uri: &str,
-        response_hash: B256,
-        tag: &str,
+        response: &ValidationResponse,
     ) -> Result<TxOutcome<()>, ProviderError> {
-        if response > 100 {
+        if response.response > 100 {
             return Err(ProviderError::ResponseOutOfRange);
         }
         let receipt = self
             .send(IValidationRegistry::validationResponseCall {
-                requestHash: request_hash,
-                response,
-                responseURI: response_uri.into(),
-                responseHash: response_hash,
-                tag: tag.into(),
+                requestHash: response.request_hash,
+                response: response.response,
+                responseURI: response.response_uri.clone(),
+                responseHash: response.response_hash,
+                tag: response.tag.clone(),
             })
             .await?;
         Ok(TxOutcome {

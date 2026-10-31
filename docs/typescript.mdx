@@ -1,0 +1,75 @@
+---
+title: TypeScript
+description: @qntx/erc8004 — installs, subpaths, actions and resolution.
+---
+
+```bash
+bun add @qntx/erc8004 viem
+```
+
+## Subpath exports
+
+| Subpath                     | Contents                                                                   |
+| --------------------------- | -------------------------------------------------------------------------- |
+| `@qntx/erc8004`             | Protocol core, actions decorators, resolver, events, receipt helpers       |
+| `@qntx/erc8004/abi`         | Vendored registry ABIs + `protocolEventsAbi`                               |
+| `@qntx/erc8004/core`        | Sans-IO core: agent registry ids, feedback values, revert decoding, errors |
+| `@qntx/erc8004/deployments` | Verified deployment table                                                  |
+| `@qntx/erc8004/validation`  | Validation-registry actions                                                |
+
+## On-chain actions
+
+Reads and writes are viem-style free functions taking `(client, args)`; the
+decorators bind them under `erc8004*` method names:
+
+```ts
+const publicClient = createPublicClient({ chain: base, transport: http() }).extend(
+  erc8004PublicActions(),
+);
+
+const agent = await publicClient.erc8004GetAgent({ agentId: 1n });
+const summary = await publicClient.erc8004GetReputationSummary({
+  agentId: 1n,
+  clients: ["0x…"],
+});
+const status = await publicClient.erc8004GetValidationStatus({ requestHash });
+
+const wallet = createWalletClient({ account, chain: base, transport: http() }).extend(
+  erc8004WalletActions(),
+);
+
+const hash = await wallet.erc8004RegisterAgent({ agentUri: "https://…" });
+const { logs } = await publicClient.waitForTransactionReceipt({ hash });
+const agentId = parseRegisteredAgentId(logs);
+```
+
+`options.deployment` on a decorator pins registry addresses; otherwise each
+call resolves via `getDeployment(client.chain.id)` and throws
+`UnsupportedChainError` for unknown chains. Every call also takes an explicit
+`address` in `args` to bypass resolution.
+
+Contract reverts rethrow `ContractRevertError` (`code: "ContractRevert"`,
+`reason: RevertReason`); client-side guards throw `ClientGuardError` /
+`AgentWalletDeadlineError` before any RPC. `signAgentWallet` produces the new
+wallet's EIP-712 signature for `setAgentWallet`.
+
+## agentURI resolution
+
+```ts
+const file = await resolveAgentUri(agent.agentUri, {
+  ipfsGateway: "https://ipfs.io/ipfs/",
+  maxBytes: 1 << 20,
+  signal: controller.signal,
+});
+
+const ok = await checkEndpointDomain(
+  "https://agent.example",
+  { agentRegistry: "eip155:8453:0x742d…", agentId: 1n },
+  { fetch: myFetch },
+);
+```
+
+`resolveAgentUri` handles `data:`/`https:`/`ipfs:` URIs, rejects non-2xx
+responses and bodies over `maxBytes` (checked on `content-length` first, then
+on the actual body), and parses into a `RegistrationFile`. I/O is injected:
+`fetch` defaults to `globalThis.fetch` at call time.
