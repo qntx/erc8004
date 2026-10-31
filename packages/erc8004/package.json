@@ -1,0 +1,88 @@
+{
+  "name": "@qntx/erc8004",
+  "version": "0.5.0",
+  "description": "ERC-8004 Trustless Agents protocol SDK in TypeScript",
+  "keywords": [
+    "agents",
+    "erc8004",
+    "ethereum",
+    "sdk",
+    "trustless",
+    "typescript"
+  ],
+  "homepage": "https://github.com/qntx/erc8004#readme",
+  "bugs": {
+    "url": "https://github.com/qntx/erc8004/issues"
+  },
+  "license": "MIT OR Apache-2.0",
+  "author": "QuantX <x@qntx.org>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qntx/erc8004.git",
+    "directory": "packages/erc8004"
+  },
+  "files": [
+    "dist",
+    "LICENSE-MIT",
+    "LICENSE-APACHE"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
+    },
+    "./abi": {
+      "types": "./dist/abi.d.mts",
+      "import": "./dist/abi.mjs",
+      "default": "./dist/abi.mjs"
+    },
+    "./core": {
+      "types": "./dist/core.d.mts",
+      "import": "./dist/core.mjs",
+      "default": "./dist/core.mjs"
+    },
+    "./deployments": {
+      "types": "./dist/deployments.d.mts",
+      "import": "./dist/deployments.mjs",
+      "default": "./dist/deployments.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.src.json",
+    "check:pkg": "vp pack && publint && attw --pack . --profile esm-only",
+    "prepublishOnly": "vp run build"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
+    "@qntx/tsconfig": "1.0.1",
+    "@types/node": "26.6.5",
+    "publint": "0.3.25",
+    "typescript": "7.0.2",
+    "viem": "2.57.11",
+    "vite-plus": "1.3.0"
+  },
+  "peerDependencies": {
+    "viem": "^2.57.11"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "bun",
+      "version": "1.4.0",
+      "onFail": "ignore"
+    }
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

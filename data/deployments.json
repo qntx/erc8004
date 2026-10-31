@@ -1,0 +1,454 @@
+{
+  "source": {
+    "generatedBy": "scripts/deployments/verify.ts",
+    "generatedAt": "2026-10-31T16:09:23.834Z",
+    "rule": "eth_chainId matches + getVersion() == \"2.0.0\" on all three registries + reputation/validation getIdentityRegistry() == identity address",
+    "upstream": {
+      "repo": "https://github.com/erc-8004/erc-8004-contracts",
+      "commit": "b9e466c250744a7e06b13dff9d3c2844ed64f825"
+    }
+  },
+  "deployments": [
+    {
+      "id": "ethereum",
+      "name": "Ethereum",
+      "chainId": 1,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "optimism",
+      "name": "Optimism",
+      "chainId": 10,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "bsc",
+      "name": "BSC",
+      "chainId": 56,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "gnosis",
+      "name": "Gnosis",
+      "chainId": 100,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "polygon",
+      "name": "Polygon",
+      "chainId": 137,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "monad",
+      "name": "Monad",
+      "chainId": 143,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "xlayer",
+      "name": "XLayer",
+      "chainId": 196,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "shape",
+      "name": "Shape",
+      "chainId": 360,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "metis",
+      "name": "Metis",
+      "chainId": 1088,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "injective",
+      "name": "Injective",
+      "chainId": 1776,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "goat",
+      "name": "GOAT",
+      "chainId": 2345,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "abstract",
+      "name": "Abstract",
+      "chainId": 2741,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "megaeth",
+      "name": "MegaETH",
+      "chainId": 4326,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "robinhood",
+      "name": "Robinhood Chain",
+      "chainId": 4663,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "mantle",
+      "name": "Mantle",
+      "chainId": 5000,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "base",
+      "name": "Base",
+      "chainId": 8453,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "zero-g",
+      "name": "0G",
+      "chainId": 16661,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "arbitrum",
+      "name": "Arbitrum",
+      "chainId": 42161,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "celo",
+      "name": "Celo",
+      "chainId": 42220,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "avalanche",
+      "name": "Avalanche",
+      "chainId": 43114,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "linea",
+      "name": "Linea",
+      "chainId": 59144,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "taiko",
+      "name": "Taiko",
+      "chainId": 167000,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "scroll",
+      "name": "Scroll",
+      "chainId": 534352,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "skale-base",
+      "name": "SKALE Base",
+      "chainId": 1187947933,
+      "testnet": false,
+      "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "validationRegistry": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58"
+    },
+    {
+      "id": "bsc-testnet",
+      "name": "BSC Testnet",
+      "chainId": 97,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "hedera-testnet",
+      "name": "Hedera Testnet",
+      "chainId": 296,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "injective-testnet",
+      "name": "Injective Testnet",
+      "chainId": 1439,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "soneium-minato",
+      "name": "Soneium Minato",
+      "chainId": 1946,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "xlayer-testnet",
+      "name": "XLayer Testnet",
+      "chainId": 1952,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "mantle-sepolia",
+      "name": "Mantle Sepolia",
+      "chainId": 5003,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "megaeth-testnet",
+      "name": "MegaETH Testnet",
+      "chainId": 6343,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "billions-testnet",
+      "name": "Billions Testnet",
+      "chainId": 6913,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "monad-testnet",
+      "name": "Monad Testnet",
+      "chainId": 10143,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "shape-sepolia",
+      "name": "Shape Sepolia",
+      "chainId": 11011,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "abstract-sepolia",
+      "name": "Abstract Sepolia",
+      "chainId": 11124,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "zero-g-galileo",
+      "name": "0G Galileo Testnet",
+      "chainId": 16602,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "avalanche-fuji",
+      "name": "Avalanche Fuji",
+      "chainId": 43113,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "robinhood-testnet",
+      "name": "Robinhood Chain Testnet",
+      "chainId": 46630,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "linea-sepolia",
+      "name": "Linea Sepolia",
+      "chainId": 59141,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "metis-sepolia",
+      "name": "Metis Sepolia",
+      "chainId": 59902,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "polygon-amoy",
+      "name": "Polygon Amoy",
+      "chainId": 80002,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "base-sepolia",
+      "name": "Base Sepolia",
+      "chainId": 84532,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "taiko-hoodi",
+      "name": "Taiko Hoodi",
+      "chainId": 167013,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "arbitrum-sepolia",
+      "name": "Arbitrum Sepolia",
+      "chainId": 421614,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "arc-testnet",
+      "name": "Arc Testnet",
+      "chainId": 5042002,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "celo-sepolia",
+      "name": "Celo Sepolia",
+      "chainId": 11142220,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "ethereum-sepolia",
+      "name": "Ethereum Sepolia",
+      "chainId": 11155111,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "optimism-sepolia",
+      "name": "Optimism Sepolia",
+      "chainId": 11155420,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    },
+    {
+      "id": "skale-base-sepolia",
+      "name": "SKALE Base Sepolia",
+      "chainId": 324705682,
+      "testnet": true,
+      "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+    }
+  ]
+}

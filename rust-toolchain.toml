@@ -1,2 +1,8 @@
 [toolchain]
-channel = "stable"
+# Pin to the workspace MSRV (edition 2024), exact patch version: codegen can
+# change between patch releases. Bumping this requires updating rust-version
+# under [workspace.package] in Cargo.toml.
+channel    = "1.99.1"
+components = ["rustfmt", "clippy"]
+targets    = ["wasm32-unknown-unknown"]
+profile    = "minimal"

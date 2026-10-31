@@ -9,10 +9,26 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   ci:
+    uses: qntx/workflows/.github/workflows/ci-bun.yml@v2
+    permissions:
+      contents: read
+    # bun run lint → vp check + taplo + check-version + gen --check + parity
+    # bun run build → vp run -r build
+    # bun run test → vp run -r test + repo-level scripts/*.test.ts
+
+  rust:
     uses: qntx/workflows/.github/workflows/ci-rust.yml@v2
     permissions:
       contents: read
     with:
-      submodules: true
+      # rust-version omitted: rust-toolchain.toml pins the toolchain.
+      deny: true
+      doc: true
+      package-check: true
+      packages: erc8004

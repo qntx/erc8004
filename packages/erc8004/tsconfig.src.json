@@ -1,0 +1,10 @@
+{
+  // The library's runtime floor is Hermes V1, which has no ES2023 array
+  // methods (toSorted, toReversed, ...). Compile src against es2022 so any
+  // ES2023+ API use is a typecheck error.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["es2022"]
+  },
+  "include": ["src"]
+}

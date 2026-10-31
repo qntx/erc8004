@@ -1,0 +1,49 @@
+{
+  "name": "@qntx/erc8004-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT OR Apache-2.0",
+  "author": "QuantX <x@qntx.org>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qntx/erc8004.git"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "gen": "bun scripts/gen.ts",
+    "lint": "vp check && taplo fmt --check && bun scripts/check-version.ts && bun scripts/gen.ts --check && bun scripts/parity/check.ts",
+    "typecheck": "vp run -r typecheck && tsc --noEmit",
+    "build": "vp run -r build",
+    "test": "vp run -r test && vp test",
+    "release": "bumpp",
+    "prepare": "vp config"
+  },
+  "devDependencies": {
+    "@qntx/oxfmt": "1.1.1",
+    "@qntx/oxlint": "1.1.1",
+    "@qntx/tsconfig": "1.0.1",
+    "@taplo/cli": "0.7.0",
+    "@types/node": "26.6.5",
+    "bumpp": "12.3.0",
+    "typescript": "7.0.2",
+    "viem": "2.57.11",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.0.0",
+    "vite-plus": "1.3.0"
+  },
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.0.0"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "bun",
+      "version": "1.4.0",
+      "onFail": "ignore"
+    }
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

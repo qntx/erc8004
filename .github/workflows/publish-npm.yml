@@ -1,0 +1,22 @@
+# Caller owns on:. Pin at @v2.
+# OIDC. Do not pass NPM_TOKEN. Do not set environment, runs-on, or steps.
+# Required check-run on a tag: erc8004 / publish.
+name: Publish
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  erc8004:
+    uses: qntx/workflows/.github/workflows/publish-npm.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      package-manager: bun
+      working-directory: packages/erc8004
