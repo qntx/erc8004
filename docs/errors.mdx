@@ -9,7 +9,7 @@ are one-to-one across languages, so callers on either side can match on a
 single vocabulary. Rust enums are non-exhaustive — match with a wildcard arm.
 
 | Code                      | TypeScript                 | Rust                       | Meaning                                               |
-| ------------------------- | -------------------------- | -------------------------- | ----------------------------------------------------- | ----- | ------- |
+| ------------------------- | -------------------------- | -------------------------- | ----------------------------------------------------- |
 | `Malformed`               | `AgentRegistryError`       | `AgentRegistryError`       | `eip155:{chain}:{addr}` does not parse                |
 | `UnsupportedNamespace`    | `AgentRegistryError`       | `AgentRegistryError`       | Namespace is not `eip155`                             |
 | `InvalidChainId`          | `AgentRegistryError`       | `AgentRegistryError`       | Chain id segment is not a non-negative integer        |
@@ -17,7 +17,7 @@ single vocabulary. Rust enums are non-exhaustive — match with a wildcard arm.
 | `BadChecksum`             | `AgentRegistryError`       | `AgentRegistryError`       | EIP-55 checksum mismatch                              |
 | `InvalidDecimalString`    | `FeedbackValueError`       | `FeedbackValueError`       | Not `-?[0-9]+(\.[0-9]+)?`                             |
 | `TooManyDecimals`         | `FeedbackValueError`       | `FeedbackValueError`       | `decimals > 18`                                       |
-| `ValueOutOfRange`         | `FeedbackValueError`       | `FeedbackValueError`       | `                                                     | value | > 1e38` |
+| `ValueOutOfRange`         | `FeedbackValueError`       | `FeedbackValueError`       | `` `\|value\| > 1e38` ``                              |
 | `InvalidDecimals`         | `FeedbackValueError`       | `FeedbackValueError`       | Fraction digits disagree with `decimals`              |
 | `NotDataUri`              | `DataUriError`             | `DataUriError`             | Missing `data:` prefix                                |
 | `UnsupportedMediaType`    | `DataUriError`             | `DataUriError`             | Not `application/json`                                |

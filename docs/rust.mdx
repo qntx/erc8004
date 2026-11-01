@@ -12,11 +12,11 @@ tokio   = { version = "1", features = ["macros", "rt-multi-thread"] }
 
 ## Features
 
-| Feature    | Effect                                                                   |
-| ---------- | ------------------------------------------------------------------------ |
-| `provider` | `Erc8004<P>` on-chain client (alloy providers + network + rpc-types-eth) |
-| `fetch`    | `Resolver` agentURI fetcher (reqwest, rustls)                            |
-| `default`  | `provider` + `fetch`                                                     |
+| Feature    | Effect                                                                        |
+| ---------- | ----------------------------------------------------------------------------- |
+| `provider` | generic `Erc8004` on-chain client (alloy providers + network + rpc-types-eth) |
+| `fetch`    | `Resolver` agentURI fetcher (reqwest, rustls)                                 |
+| `default`  | `provider` + `fetch`                                                          |
 
 `--no-default-features` is the pure sans-IO core and compiles for
 `wasm32-unknown-unknown` with no `tokio`/`reqwest`/`getrandom` in the tree.
@@ -38,7 +38,7 @@ println!("feedback #{} in {}", outcome.value, outcome.tx_hash);
 ```
 
 `Erc8004::identity()/reputation()/validation()` return borrowed handles mirroring
-the TypeScript actions one-to-one. Writes return `TxOutcome<T>` (`tx_hash` plus
+the TypeScript actions one-to-one. Writes return `TxOutcome` (`tx_hash` plus
 the parsed value — `register_agent` yields `U256`, `give_feedback` the new
 feedback index). RPC errors with revert data become
 `ProviderError::Revert(RevertReason)`; receipt failures become
