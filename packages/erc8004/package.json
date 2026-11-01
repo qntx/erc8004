@@ -1,6 +1,6 @@
 {
   "name": "@qntx/erc8004",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "ERC-8004 Trustless Agents protocol SDK in TypeScript",
   "keywords": [
     "agents",

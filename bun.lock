@@ -19,7 +19,7 @@
     },
     "packages/erc8004": {
       "name": "@qntx/erc8004",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "dependencies": {
         "@scure/base": "^2.4.0",
       },
