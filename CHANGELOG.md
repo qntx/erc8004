@@ -11,6 +11,15 @@ crates.io). npm and crate versions are lockstep.
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-01
+
+### Changed
+
+- Release through the tag-triggered npm trusted publishing and crates.io
+  workflows; no API changes since 0.5.0.
+
+## [0.5.0] - 2026-11-01
+
 ### Added
 
 - `@qntx/erc8004` (`packages/erc8004`): TypeScript SDK layered as `/abi`
