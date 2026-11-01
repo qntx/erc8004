@@ -228,10 +228,7 @@ impl<'a, P: Provider> Identity<'a, P> {
             .await?
         };
         let agent_id = parse_registered_agent_id(&receipt)?;
-        Ok(TxOutcome {
-            tx_hash: receipt.transaction_hash,
-            value: agent_id,
-        })
+        Ok(TxOutcome::new(&receipt, agent_id))
     }
 
     /// `setAgentURI`.
@@ -250,10 +247,7 @@ impl<'a, P: Provider> Identity<'a, P> {
                 newURI: agent_uri.into(),
             })
             .await?;
-        Ok(TxOutcome {
-            tx_hash: receipt.transaction_hash,
-            value: (),
-        })
+        Ok(TxOutcome::new(&receipt, ()))
     }
 
     /// `setMetadata` — `agentWallet` is reserved.
@@ -275,10 +269,7 @@ impl<'a, P: Provider> Identity<'a, P> {
                 metadataValue: value,
             })
             .await?;
-        Ok(TxOutcome {
-            tx_hash: receipt.transaction_hash,
-            value: (),
-        })
+        Ok(TxOutcome::new(&receipt, ()))
     }
 
     /// `setAgentWallet` — `deadline` checked against the latest block timestamp (±5 minutes).
@@ -309,10 +300,7 @@ impl<'a, P: Provider> Identity<'a, P> {
                 signature,
             })
             .await?;
-        Ok(TxOutcome {
-            tx_hash: receipt.transaction_hash,
-            value: (),
-        })
+        Ok(TxOutcome::new(&receipt, ()))
     }
 
     /// `unsetAgentWallet`.
@@ -324,10 +312,7 @@ impl<'a, P: Provider> Identity<'a, P> {
         let receipt = self
             .send(IIdentityRegistry::unsetAgentWalletCall { agentId: agent_id })
             .await?;
-        Ok(TxOutcome {
-            tx_hash: receipt.transaction_hash,
-            value: (),
-        })
+        Ok(TxOutcome::new(&receipt, ()))
     }
 
     /// `transferFrom` — `from` is read from `ownerOf` (works for owner and
@@ -351,10 +336,7 @@ impl<'a, P: Provider> Identity<'a, P> {
                 tokenId: agent_id,
             })
             .await?;
-        Ok(TxOutcome {
-            tx_hash: receipt.transaction_hash,
-            value: (),
-        })
+        Ok(TxOutcome::new(&receipt, ()))
     }
 
     /// `approve`.
@@ -373,10 +355,7 @@ impl<'a, P: Provider> Identity<'a, P> {
                 tokenId: agent_id,
             })
             .await?;
-        Ok(TxOutcome {
-            tx_hash: receipt.transaction_hash,
-            value: (),
-        })
+        Ok(TxOutcome::new(&receipt, ()))
     }
 
     /// `setApprovalForAll`.
@@ -392,10 +371,7 @@ impl<'a, P: Provider> Identity<'a, P> {
         let receipt = self
             .send(IIdentityRegistry::setApprovalForAllCall { operator, approved })
             .await?;
-        Ok(TxOutcome {
-            tx_hash: receipt.transaction_hash,
-            value: (),
-        })
+        Ok(TxOutcome::new(&receipt, ()))
     }
 }
 

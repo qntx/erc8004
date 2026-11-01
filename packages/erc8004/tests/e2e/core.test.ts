@@ -216,7 +216,7 @@ describe("e2e", { timeout: 30_000 }, () => {
     const fb = await readFeedback(publicClient, {
       ...repArgs,
       agentId,
-      client: client.address,
+      clientAddress: client.address,
       feedbackIndex: index,
     });
     expect(fb.value.value).toBe(8750n);
@@ -227,7 +227,7 @@ describe("e2e", { timeout: 30_000 }, () => {
     const all = await readAllFeedback(publicClient, {
       ...repArgs,
       agentId,
-      clients: [client.address],
+      clientAddresses: [client.address],
     });
     expect(all).toHaveLength(1);
     expect(all[0]?.feedbackIndex).toBe(index);
@@ -235,7 +235,7 @@ describe("e2e", { timeout: 30_000 }, () => {
     const summary = await getReputationSummary(publicClient, {
       ...repArgs,
       agentId,
-      clients: [client.address],
+      clientAddresses: [client.address],
     });
     expect(summary.count).toBe(1n);
     expect(summary.value.value).toBe(8750n);
@@ -243,7 +243,7 @@ describe("e2e", { timeout: 30_000 }, () => {
 
     // empty clients → client guard
     await expect(
-      getReputationSummary(publicClient, { ...repArgs, agentId, clients: [] }),
+      getReputationSummary(publicClient, { ...repArgs, agentId, clientAddresses: [] }),
     ).rejects.toMatchObject({ code: "ClientAddressesRequired" });
 
     // append a response then read the count
@@ -251,7 +251,7 @@ describe("e2e", { timeout: 30_000 }, () => {
       hash: await appendResponse(clientW, {
         ...repArgs,
         agentId,
-        client: client.address,
+        clientAddress: client.address,
         feedbackIndex: index,
         responseUri: "ipfs://response",
       }),
@@ -259,7 +259,7 @@ describe("e2e", { timeout: 30_000 }, () => {
     const count = await getResponseCount(publicClient, {
       ...repArgs,
       agentId,
-      client: client.address,
+      clientAddress: client.address,
       feedbackIndex: index,
       responders: [client.address],
     });
@@ -278,7 +278,7 @@ describe("e2e", { timeout: 30_000 }, () => {
       appendResponse(clientW, {
         ...repArgs,
         agentId,
-        client: client.address,
+        clientAddress: client.address,
         feedbackIndex: index,
         responseUri: "",
       }),

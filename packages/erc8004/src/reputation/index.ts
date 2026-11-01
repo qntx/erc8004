@@ -13,4 +13,4 @@ export {
   readFeedback,
   revokeFeedback,
 } from "./actions.ts";
-export type { Feedback, FeedbackEntry } from "./actions.ts";
+export type { Feedback, FeedbackEntry, ReputationSummary } from "./actions.ts";

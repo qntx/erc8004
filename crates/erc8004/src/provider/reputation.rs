@@ -29,7 +29,7 @@ pub struct Feedback {
 #[non_exhaustive]
 pub struct FeedbackEntry {
     /// The feedback author's address.
-    pub client: Address,
+    pub client_address: Address,
     /// The feedback index.
     pub feedback_index: u64,
     /// The `(value, valueDecimals)` pair.
@@ -130,8 +130,8 @@ impl NewFeedback {
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct FeedbackFilter {
-    /// Clients to filter by; empty matches every client.
-    pub clients: Vec<Address>,
+    /// Client addresses to filter by; empty matches every client.
+    pub client_addresses: Vec<Address>,
     /// Optional primary tag filter.
     pub tag1: String,
     /// Optional secondary tag filter.
@@ -140,9 +140,10 @@ pub struct FeedbackFilter {
 
 impl FeedbackFilter {
     /// Filters to specific clients; `FeedbackFilter::default()` matches every client.
-    pub fn new(clients: impl Into<Vec<Address>>) -> Self {
+    #[must_use]
+    pub fn new(client_addresses: impl Into<Vec<Address>>) -> Self {
         Self {
-            clients: clients.into(),
+            client_addresses: client_addresses.into(),
             ..Self::default()
         }
     }
@@ -200,13 +201,13 @@ impl<'a, P: Provider> Reputation<'a, P> {
     pub async fn read_feedback(
         &self,
         agent_id: U256,
-        client: Address,
+        client_address: Address,
         feedback_index: u64,
     ) -> Result<Feedback, ProviderError> {
         let result = self
             .call(IReputationRegistry::readFeedbackCall {
                 agentId: agent_id,
-                clientAddress: client,
+                clientAddress: client_address,
                 feedbackIndex: feedback_index,
             })
             .await?;
@@ -235,37 +236,63 @@ impl<'a, P: Provider> Reputation<'a, P> {
         let result = self
             .call(IReputationRegistry::readAllFeedbackCall {
                 agentId: agent_id,
-                clientAddresses: filter.clients.clone(),
+                clientAddresses: filter.client_addresses.clone(),
                 tag1: filter.tag1.clone(),
                 tag2: filter.tag2.clone(),
                 includeRevoked: include_revoked,
             })
             .await?;
-        let clients_r = result.clients;
-        let indexes = result.feedbackIndexes;
-        let values = result.values;
-        let decimals = result.valueDecimals;
-        let tag1s = result.tag1s;
-        let tag2s = result.tag2s;
-        let revoked = result.revokedStatuses;
-        let mut out = Vec::with_capacity(clients_r.len());
-        for (i, client) in clients_r.iter().enumerate() {
-            let pair =
-                FeedbackValue::new(*values.get(i).unwrap_or(&0), *decimals.get(i).unwrap_or(&0))
-                    .map_err(|e| ProviderError::InvalidResponse(e.to_string()))?;
-            out.push(FeedbackEntry {
-                client: *client,
-                feedback_index: *indexes.get(i).unwrap_or(&0),
-                value: pair,
-                tag1: tag1s.get(i).cloned().unwrap_or_default(),
-                tag2: tag2s.get(i).cloned().unwrap_or_default(),
-                is_revoked: *revoked.get(i).unwrap_or(&false),
-            });
+        let IReputationRegistry::readAllFeedbackReturn {
+            clients,
+            feedbackIndexes: indexes,
+            values,
+            valueDecimals: decimals,
+            tag1s,
+            tag2s,
+            revokedStatuses: revoked,
+        } = result;
+        let n = clients.len();
+        if [
+            indexes.len(),
+            values.len(),
+            decimals.len(),
+            tag1s.len(),
+            tag2s.len(),
+            revoked.len(),
+        ]
+        .iter()
+        .any(|&len| len != n)
+        {
+            return Err(ProviderError::InvalidResponse(
+                "readAllFeedback returned mismatched array lengths".into(),
+            ));
         }
-        Ok(out)
+        clients
+            .into_iter()
+            .zip(indexes)
+            .zip(values.into_iter().zip(decimals))
+            .zip(tag1s.into_iter().zip(tag2s))
+            .zip(revoked)
+            .map(
+                |(
+                    (((client_address, feedback_index), (value, decimals)), (tag1, tag2)),
+                    is_revoked,
+                )| {
+                    Ok(FeedbackEntry {
+                        client_address,
+                        feedback_index,
+                        value: FeedbackValue::new(value, decimals)
+                            .map_err(|e| ProviderError::InvalidResponse(e.to_string()))?,
+                        tag1,
+                        tag2,
+                        is_revoked,
+                    })
+                },
+            )
+            .collect()
     }
 
-    /// `getSummary` — `filter.clients` must be non-empty.
+    /// `getSummary` — `filter.client_addresses` must be non-empty.
     ///
     /// # Errors
     ///
@@ -276,13 +303,13 @@ impl<'a, P: Provider> Reputation<'a, P> {
         agent_id: U256,
         filter: &FeedbackFilter,
     ) -> Result<ReputationSummary, ProviderError> {
-        if filter.clients.is_empty() {
+        if filter.client_addresses.is_empty() {
             return Err(ProviderError::ClientAddressesRequired);
         }
         let result = self
             .call(IReputationRegistry::getSummaryCall {
                 agentId: agent_id,
-                clientAddresses: filter.clients.clone(),
+                clientAddresses: filter.client_addresses.clone(),
                 tag1: filter.tag1.clone(),
                 tag2: filter.tag2.clone(),
             })
@@ -311,16 +338,17 @@ impl<'a, P: Provider> Reputation<'a, P> {
     pub async fn get_last_index(
         &self,
         agent_id: U256,
-        client: Address,
+        client_address: Address,
     ) -> Result<u64, ProviderError> {
         self.call(IReputationRegistry::getLastIndexCall {
             agentId: agent_id,
-            clientAddress: client,
+            clientAddress: client_address,
         })
         .await
     }
 
-    /// `getResponseCount` — `client`/`feedback_index`/`responders` are paired (all set or all unset).
+    /// `getResponseCount` — contract semantics: zero `client_address` → every client;
+    /// `feedback_index` 0 → every feedback of that client; empty `responders` → every responder.
     ///
     /// # Errors
     ///
@@ -328,13 +356,13 @@ impl<'a, P: Provider> Reputation<'a, P> {
     pub async fn get_response_count(
         &self,
         agent_id: U256,
-        client: Option<Address>,
+        client_address: Option<Address>,
         feedback_index: Option<u64>,
         responders: &[Address],
     ) -> Result<u64, ProviderError> {
         self.call(IReputationRegistry::getResponseCountCall {
             agentId: agent_id,
-            clientAddress: client.unwrap_or(Address::ZERO),
+            clientAddress: client_address.unwrap_or(Address::ZERO),
             feedbackIndex: feedback_index.unwrap_or(0),
             responders: responders.to_vec(),
         })
@@ -373,10 +401,7 @@ impl<'a, P: Provider> Reputation<'a, P> {
             })
             .await?;
         let index = parse_feedback_index(&receipt)?;
-        Ok(TxOutcome {
-            tx_hash: receipt.transaction_hash,
-            value: index,
-        })
+        Ok(TxOutcome::new(&receipt, index))
     }
 
     /// `revokeFeedback`.
@@ -395,10 +420,7 @@ impl<'a, P: Provider> Reputation<'a, P> {
                 feedbackIndex: feedback_index,
             })
             .await?;
-        Ok(TxOutcome {
-            tx_hash: receipt.transaction_hash,
-            value: (),
-        })
+        Ok(TxOutcome::new(&receipt, ()))
     }
 
     /// `appendResponse` — `response_uri` must be non-empty.
@@ -409,7 +431,7 @@ impl<'a, P: Provider> Reputation<'a, P> {
     pub async fn append_response(
         &self,
         agent_id: U256,
-        client: Address,
+        client_address: Address,
         feedback_index: u64,
         response_uri: &str,
         response_hash: B256,
@@ -420,16 +442,13 @@ impl<'a, P: Provider> Reputation<'a, P> {
         let receipt = self
             .send(IReputationRegistry::appendResponseCall {
                 agentId: agent_id,
-                clientAddress: client,
+                clientAddress: client_address,
                 feedbackIndex: feedback_index,
                 responseURI: response_uri.into(),
                 responseHash: response_hash,
             })
             .await?;
-        Ok(TxOutcome {
-            tx_hash: receipt.transaction_hash,
-            value: (),
-        })
+        Ok(TxOutcome::new(&receipt, ()))
     }
 }
 

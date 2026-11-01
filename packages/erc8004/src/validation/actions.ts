@@ -1,34 +1,14 @@
-import type { Account, Address, Client, Hash, Hex } from "viem";
+import type { Address, Client, Hash, Hex } from "viem";
 import { zeroHash } from "viem";
-import { parseAccount } from "viem/accounts";
-import { readContract, writeContract } from "viem/actions";
+import { writeContract } from "viem/actions";
 
 import { validationRegistryAbi } from "../abi/index.ts";
 import { ClientGuardError, ContractRevertError } from "../core/errors.ts";
 import { withContractRevert } from "../core/revert-map.ts";
-import type { Deployment } from "../deployments/deployment.ts";
-import { resolveRegistryAddress } from "../deployments/resolve.ts";
+import { read, registry, sender } from "../deployments/resolve.ts";
+import type { ActionArgs } from "../deployments/resolve.ts";
 
-type Args = {
-  address?: Address | undefined;
-  deployment?: Deployment | undefined;
-  account?: Account | Address | undefined;
-};
-
-function registry(client: Pick<Client, "chain">, args: Args): Address {
-  return resolveRegistryAddress(client, "validation", args.address, args.deployment);
-}
-
-function sender(client: Client, account?: Account | Address): Account {
-  const found = account ?? client.account;
-  if (found === undefined) {
-    throw new ClientGuardError(
-      "MissingAccount",
-      "no account on the client; pass args.account or use a wallet client",
-    );
-  }
-  return parseAccount(found);
-}
+type Args = ActionArgs;
 
 /** `getValidationStatus` row. */
 export type ValidationStatus = {
@@ -40,20 +20,28 @@ export type ValidationStatus = {
   lastUpdate: bigint;
 };
 
-/** `null` exactly when the contract reverts with `UnknownRequest`. */
+/** `getSummary` aggregate for validation requests. */
+export type ValidationSummary = {
+  count: bigint;
+  averageResponse: number;
+};
+
+/**
+ * `getValidationStatus` for one request hash — `null` exactly when the contract reverts with
+ * `UnknownRequest`; other reverts surface as `ContractRevertError`.
+ */
 export async function getValidationStatus(
   client: Client,
   args: Args & { requestHash: Hex },
   // oxlint-disable-next-line typescript/no-restricted-types -- spec: UnknownRequest maps to null.
 ): Promise<ValidationStatus | null> {
   try {
-    const [validator, agentId, response, responseHash, tag, lastUpdate] = await withContractRevert(
-      readContract(client, {
-        abi: validationRegistryAbi,
-        address: registry(client, args),
-        functionName: "getValidationStatus",
-        args: [args.requestHash],
-      }),
+    const [validator, agentId, response, responseHash, tag, lastUpdate] = await read(
+      client,
+      registry(client, "validation", args),
+      validationRegistryAbi,
+      "getValidationStatus",
+      [args.requestHash],
     );
     return { validator, agentId, response, responseHash, tag, lastUpdate };
   } catch (error) {
@@ -64,59 +52,61 @@ export async function getValidationStatus(
   }
 }
 
+/** `getSummary` — count + average response over `validators` (empty = all). */
 export async function getValidationSummary(
   client: Client,
   args: Args & { agentId: bigint; validators?: ReadonlyArray<Address>; tag?: string },
-): Promise<{ count: bigint; averageResponse: number }> {
-  const [count, avgResponse] = await withContractRevert(
-    readContract(client, {
-      abi: validationRegistryAbi,
-      address: registry(client, args),
-      functionName: "getSummary",
-      args: [args.agentId, args.validators ? [...args.validators] : [], args.tag ?? ""],
-    }),
+): Promise<ValidationSummary> {
+  const [count, averageResponse] = await read(
+    client,
+    registry(client, "validation", args),
+    validationRegistryAbi,
+    "getSummary",
+    [args.agentId, [...(args.validators ?? [])], args.tag ?? ""],
   );
-  return { count, averageResponse: avgResponse };
+  return { count, averageResponse };
 }
 
+/** `getAgentValidations` — every request hash for `agentId`. */
 export async function getAgentValidations(
   client: Client,
   args: Args & { agentId: bigint },
 ): Promise<ReadonlyArray<Hex>> {
-  return withContractRevert(
-    readContract(client, {
-      abi: validationRegistryAbi,
-      address: registry(client, args),
-      functionName: "getAgentValidations",
-      args: [args.agentId],
-    }),
+  return read(
+    client,
+    registry(client, "validation", args),
+    validationRegistryAbi,
+    "getAgentValidations",
+    [args.agentId],
   );
 }
 
+/** `getValidatorRequests` — every request hash assigned to `validator`. */
 export async function getValidatorRequests(
   client: Client,
   args: Args & { validator: Address },
 ): Promise<ReadonlyArray<Hex>> {
-  return withContractRevert(
-    readContract(client, {
-      abi: validationRegistryAbi,
-      address: registry(client, args),
-      functionName: "getValidatorRequests",
-      args: [args.validator],
-    }),
+  return read(
+    client,
+    registry(client, "validation", args),
+    validationRegistryAbi,
+    "getValidatorRequests",
+    [args.validator],
   );
 }
 
+/** `getVersion` of the validation registry. */
 export async function getValidationVersion(client: Client, args: Args = {}): Promise<string> {
-  return withContractRevert(
-    readContract(client, {
-      abi: validationRegistryAbi,
-      address: registry(client, args),
-      functionName: "getVersion",
-    }),
+  return read(
+    client,
+    registry(client, "validation", args),
+    validationRegistryAbi,
+    "getVersion",
+    [],
   );
 }
 
+/** `validationRequest` write. */
 export async function requestValidation(
   client: Client,
   args: Args & { validator: Address; agentId: bigint; requestUri: string; requestHash: Hex },
@@ -124,7 +114,7 @@ export async function requestValidation(
   return withContractRevert(
     writeContract(client, {
       abi: validationRegistryAbi,
-      address: registry(client, args),
+      address: registry(client, "validation", args),
       functionName: "validationRequest",
       args: [args.validator, args.agentId, args.requestUri, args.requestHash],
       account: sender(client, args.account),
@@ -133,7 +123,10 @@ export async function requestValidation(
   );
 }
 
-/** `response` must be an integer in 0..=100 (`ResponseOutOfRange`). */
+/**
+ * `validationResponse` write; `ClientGuardError` `ResponseOutOfRange` for a non-integer or
+ * out-of-`0..=100` response.
+ */
 export async function respondToValidation(
   client: Client,
   args: Args & {
@@ -153,7 +146,7 @@ export async function respondToValidation(
   return withContractRevert(
     writeContract(client, {
       abi: validationRegistryAbi,
-      address: registry(client, args),
+      address: registry(client, "validation", args),
       functionName: "validationResponse",
       args: [
         args.requestHash,

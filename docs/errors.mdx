@@ -42,10 +42,10 @@ single vocabulary. Rust enums are non-exhaustive — match with a wildcard arm.
 | `HttpStatus`              | `ResolveError`             | `ResolveError`             | Fetch returned a non-2xx status                       |
 | `TooLarge`                | `ResolveError`             | `ResolveError`             | Body exceeds `maxBytes`                               |
 | `InvalidJson`             | `ResolveError`             | `ResolveError`             | Body is not valid JSON                                |
-| `Transport`               | —                          | `ResolveError`             | Transport failure (Rust fetch only)                   |
+| `Transport`               | `ResolveError`             | `ResolveError`             | Fetch failed (wraps the original error as `cause`)    |
 | `Rpc`                     | —                          | `ProviderError`            | Non-revert RPC failure, boxed opaque source           |
 | `TransactionFailed`       | —                          | `ProviderError`            | Receipt status is failure                             |
-| `InvalidResponse`         | —                          | `ProviderError`            | On-chain value outside SDK bounds                     |
+| `InvalidResponse`         | `InvalidResponseError`     | `ProviderError`            | On-chain value outside SDK bounds or mismatched rows  |
 
 ## Revert reasons
 

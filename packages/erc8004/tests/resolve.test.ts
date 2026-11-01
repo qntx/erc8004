@@ -9,22 +9,56 @@ const FILE_JSON = JSON.stringify(
   ),
 );
 
-function fakeFetch(body: string | Uint8Array, init?: { status?: number; length?: string }) {
+function fakeFetch(
+  body: string | Uint8Array,
+  init?: { status?: number; length?: string; url?: string },
+) {
   return async () =>
     Promise.resolve({
       ok: (init?.status ?? 200) >= 200 && (init?.status ?? 200) < 300,
       status: init?.status ?? 200,
+      url: init?.url ?? "",
       headers: {
         get: (name: string) => (name === "content-length" ? (init?.length ?? null) : null),
       },
-      text: async () =>
-        Promise.resolve(typeof body === "string" ? body : new TextDecoder().decode(body)),
       arrayBuffer: async () =>
         Promise.resolve(
           typeof body === "string"
             ? new TextEncoder().encode(body).buffer
             : (body.buffer as ArrayBuffer),
         ),
+    });
+}
+
+/**
+ * Streams `chunks` through a `body.getReader()` fake; `cancelled` flips when the reader is
+ * cancelled.
+ */
+function streamingFetch(chunks: ReadonlyArray<Uint8Array>, cancelled: { value: boolean }) {
+  return async () =>
+    Promise.resolve({
+      ok: true,
+      status: 200,
+      url: "",
+      headers: { get: () => null },
+      arrayBuffer: async () => Promise.resolve(new ArrayBuffer(0)),
+      body: {
+        getReader: () => {
+          let i = 0;
+          return {
+            read: async () =>
+              Promise.resolve(
+                i < chunks.length
+                  ? { done: false, value: chunks[i++] }
+                  : { done: true, value: undefined },
+              ),
+            cancel: async () => {
+              cancelled.value = true;
+              return Promise.resolve();
+            },
+          };
+        },
+      },
     });
 }
 
@@ -92,6 +126,61 @@ describe("resolveAgentUri", () => {
     await expect(
       resolveAgentUri("https://a.test/x", { fetch: fakeFetch(FILE_JSON), maxBytes: 8 }),
     ).rejects.toMatchObject({ code: "TooLarge" });
+  });
+
+  it("streams the body and cancels the reader on overflow", async () => {
+    const cancelled = { value: false };
+    const chunks = [
+      new TextEncoder().encode("a".repeat(16)),
+      new TextEncoder().encode("b".repeat(16)),
+    ];
+    await expect(
+      resolveAgentUri("https://a.test/x", {
+        fetch: streamingFetch(chunks, cancelled),
+        maxBytes: 8,
+      }),
+    ).rejects.toMatchObject({ code: "TooLarge" });
+    expect(cancelled.value).toBe(true);
+  });
+
+  it("reads a streamed body under the cap", async () => {
+    const cancelled = { value: false };
+    const json = new TextEncoder().encode(FILE_JSON);
+    const chunks = [json.slice(0, 8), json.slice(8)];
+    const file = await resolveAgentUri("https://a.test/x", {
+      fetch: streamingFetch(chunks, cancelled),
+    });
+    expect(file.name).toBe("t");
+    expect(cancelled.value).toBe(false);
+  });
+
+  it("rejects a redirect downgraded to non-https", async () => {
+    await expect(
+      resolveAgentUri("https://a.test/x", {
+        fetch: fakeFetch(FILE_JSON, { url: "http://evil.test/x" }),
+      }),
+    ).rejects.toMatchObject({ code: "UnsupportedScheme" });
+  });
+
+  it("maps a rejected fetch to Transport with the original cause", async () => {
+    const cause = new Error("network down");
+    await expect(
+      resolveAgentUri("https://a.test/x", {
+        fetch: async () => Promise.reject(cause),
+      }),
+    ).rejects.toMatchObject({ code: "Transport", cause });
+  });
+
+  it("rethrows aborts instead of wrapping them", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const cause = new Error("aborted");
+    await expect(
+      resolveAgentUri("https://a.test/x", {
+        fetch: async () => Promise.reject(cause),
+        signal: controller.signal,
+      }),
+    ).rejects.toBe(cause);
   });
 });
 

@@ -1,36 +1,17 @@
-import type { Account, Address, Client, Hash, Hex } from "viem";
-import { zeroHash } from "viem";
-import { parseAccount } from "viem/accounts";
-import { readContract, writeContract } from "viem/actions";
+import type { Address, Client, Hash, Hex } from "viem";
+import { zeroAddress, zeroHash } from "viem";
+import { writeContract } from "viem/actions";
 
 import { reputationRegistryAbi } from "../abi/index.ts";
-import { ClientGuardError, MissingEventError } from "../core/errors.ts";
+import { ClientGuardError, InvalidResponseError, MissingEventError } from "../core/errors.ts";
 import type { FeedbackValue } from "../core/feedback-value.ts";
+import { feedbackValue } from "../core/feedback-value.ts";
 import { withContractRevert } from "../core/revert-map.ts";
-import type { Deployment } from "../deployments/deployment.ts";
-import { resolveRegistryAddress } from "../deployments/resolve.ts";
+import { read, registry, sender } from "../deployments/resolve.ts";
+import type { ActionArgs } from "../deployments/resolve.ts";
 import { decodeErc8004Log } from "../events/index.ts";
 
-type Args = {
-  address?: Address | undefined;
-  deployment?: Deployment | undefined;
-  account?: Account | Address | undefined;
-};
-
-function registry(client: Pick<Client, "chain">, args: Args): Address {
-  return resolveRegistryAddress(client, "reputation", args.address, args.deployment);
-}
-
-function sender(client: Client, account?: Account | Address): Account {
-  const found = account ?? client.account;
-  if (found === undefined) {
-    throw new ClientGuardError(
-      "MissingAccount",
-      "no account on the client; pass args.account or use a wallet client",
-    );
-  }
-  return parseAccount(found);
-}
+type Args = ActionArgs;
 
 /** One `(value, valueDecimals)` pair from `readFeedback`. */
 export type Feedback = {
@@ -42,7 +23,7 @@ export type Feedback = {
 
 /** One zipped entry from `readAllFeedback`. */
 export type FeedbackEntry = {
-  client: Address;
+  clientAddress: Address;
   feedbackIndex: bigint;
   value: FeedbackValue;
   tag1: string;
@@ -50,138 +31,180 @@ export type FeedbackEntry = {
   isRevoked: boolean;
 };
 
-export async function readFeedback(
-  client: Client,
-  args: Args & { agentId: bigint; client: Address; feedbackIndex: bigint },
-): Promise<Feedback> {
-  const [value, valueDecimals, tag1, tag2, isRevoked] = await withContractRevert(
-    readContract(client, {
-      abi: reputationRegistryAbi,
-      address: registry(client, args),
-      functionName: "readFeedback",
-      args: [args.agentId, args.client, args.feedbackIndex],
-    }),
-  );
-  return { value: { value, decimals: valueDecimals }, tag1, tag2, isRevoked };
+/** `getSummary` aggregate. */
+export type ReputationSummary = {
+  count: bigint;
+  value: FeedbackValue;
+};
+
+/** On-chain `(value, valueDecimals)` pair checked against `FeedbackValue` bounds. */
+function checkedValue(value: bigint, decimals: number): FeedbackValue {
+  try {
+    return feedbackValue(value, decimals);
+  } catch (error) {
+    throw new InvalidResponseError(
+      `on-chain feedback value out of bounds: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
 }
 
+/** `readFeedback` — one feedback row by client/index. */
+export async function readFeedback(
+  client: Client,
+  args: Args & { agentId: bigint; clientAddress: Address; feedbackIndex: bigint },
+): Promise<Feedback> {
+  const [value, valueDecimals, tag1, tag2, isRevoked] = await read(
+    client,
+    registry(client, "reputation", args),
+    reputationRegistryAbi,
+    "readFeedback",
+    [args.agentId, args.clientAddress, args.feedbackIndex],
+  );
+  return { value: checkedValue(value, valueDecimals), tag1, tag2, isRevoked };
+}
+
+/**
+ * `readAllFeedback` — parallel arrays zipped into entries; `InvalidResponseError` when the contract
+ * returns mismatched lengths or out-of-bounds values.
+ */
 export async function readAllFeedback(
   client: Client,
   args: Args & {
     agentId: bigint;
-    clients?: ReadonlyArray<Address>;
+    clientAddresses?: ReadonlyArray<Address>;
     tag1?: string;
     tag2?: string;
     includeRevoked?: boolean;
   },
 ): Promise<FeedbackEntry[]> {
-  const result = await withContractRevert(
-    readContract(client, {
-      abi: reputationRegistryAbi,
-      address: registry(client, args),
-      functionName: "readAllFeedback",
-      args: [
-        args.agentId,
-        args.clients ?? [],
-        args.tag1 ?? "",
-        args.tag2 ?? "",
-        args.includeRevoked ?? false,
-      ],
-    }),
+  const result = await read(
+    client,
+    registry(client, "reputation", args),
+    reputationRegistryAbi,
+    "readAllFeedback",
+    [
+      args.agentId,
+      [...(args.clientAddresses ?? [])],
+      args.tag1 ?? "",
+      args.tag2 ?? "",
+      args.includeRevoked ?? false,
+    ],
   );
   const [clients, feedbackIndexes, values, decimals, tag1s, tag2s, revokedStatuses] = result;
-  return clients.map((entry, i) => ({
-    client: entry,
-    feedbackIndex: feedbackIndexes[i] ?? 0n,
-    value: { value: values[i] ?? 0n, decimals: decimals[i] ?? 0 },
-    tag1: tag1s[i] ?? "",
-    tag2: tag2s[i] ?? "",
-    isRevoked: revokedStatuses[i] ?? false,
+  const n = clients.length;
+  if (
+    feedbackIndexes.length !== n ||
+    values.length !== n ||
+    decimals.length !== n ||
+    tag1s.length !== n ||
+    tag2s.length !== n ||
+    revokedStatuses.length !== n
+  ) {
+    throw new InvalidResponseError(
+      `readAllFeedback: mismatched array lengths (${n}, ${feedbackIndexes.length}, ${values.length}, ${decimals.length}, ${tag1s.length}, ${tag2s.length}, ${revokedStatuses.length})`,
+    );
+  }
+  return clients.map((clientAddress, i) => ({
+    clientAddress,
+    // oxlint-disable-next-line typescript/no-non-null-assertion -- length verified above.
+    feedbackIndex: feedbackIndexes[i]!,
+    // oxlint-disable-next-line typescript/no-non-null-assertion -- length verified above.
+    value: checkedValue(values[i]!, decimals[i]!),
+    // oxlint-disable-next-line typescript/no-non-null-assertion -- length verified above.
+    tag1: tag1s[i]!,
+    // oxlint-disable-next-line typescript/no-non-null-assertion -- length verified above.
+    tag2: tag2s[i]!,
+    // oxlint-disable-next-line typescript/no-non-null-assertion -- length verified above.
+    isRevoked: revokedStatuses[i]!,
   }));
 }
 
-/** `getSummary` — `clients` must be non-empty (`ClientAddressesRequired`). */
+/**
+ * `getSummary` aggregate over `clientAddresses` — `ClientGuardError` `ClientAddressesRequired` for
+ * an empty list.
+ */
 export async function getReputationSummary(
   client: Client,
-  args: Args & { agentId: bigint; clients: ReadonlyArray<Address>; tag1?: string; tag2?: string },
-): Promise<{ count: bigint; value: FeedbackValue }> {
-  if (args.clients.length === 0) {
+  args: Args & {
+    agentId: bigint;
+    clientAddresses: ReadonlyArray<Address>;
+    tag1?: string;
+    tag2?: string;
+  },
+): Promise<ReputationSummary> {
+  if (args.clientAddresses.length === 0) {
     throw new ClientGuardError("ClientAddressesRequired", "getSummary: clients must be non-empty");
   }
-  const [count, summaryValue, summaryValueDecimals] = await withContractRevert(
-    readContract(client, {
-      abi: reputationRegistryAbi,
-      address: registry(client, args),
-      functionName: "getSummary",
-      args: [args.agentId, [...args.clients], args.tag1 ?? "", args.tag2 ?? ""],
-    }),
+  const [count, summaryValue, summaryValueDecimals] = await read(
+    client,
+    registry(client, "reputation", args),
+    reputationRegistryAbi,
+    "getSummary",
+    [args.agentId, [...args.clientAddresses], args.tag1 ?? "", args.tag2 ?? ""],
   );
-  return { count, value: { value: summaryValue, decimals: summaryValueDecimals } };
+  return { count, value: checkedValue(summaryValue, summaryValueDecimals) };
 }
 
+/** `getClients` — every client that left feedback for `agentId`. */
 export async function getClients(
   client: Client,
   args: Args & { agentId: bigint },
 ): Promise<ReadonlyArray<Address>> {
-  return withContractRevert(
-    readContract(client, {
-      abi: reputationRegistryAbi,
-      address: registry(client, args),
-      functionName: "getClients",
-      args: [args.agentId],
-    }),
-  );
+  return read(client, registry(client, "reputation", args), reputationRegistryAbi, "getClients", [
+    args.agentId,
+  ]);
 }
 
+/** `getLastIndex` — a client's latest feedback index for `agentId`. */
 export async function getLastIndex(
   client: Client,
-  args: Args & { agentId: bigint; client: Address },
+  args: Args & { agentId: bigint; clientAddress: Address },
 ): Promise<bigint> {
-  return withContractRevert(
-    readContract(client, {
-      abi: reputationRegistryAbi,
-      address: registry(client, args),
-      functionName: "getLastIndex",
-      args: [args.agentId, args.client],
-    }),
-  );
+  return read(client, registry(client, "reputation", args), reputationRegistryAbi, "getLastIndex", [
+    args.agentId,
+    args.clientAddress,
+  ]);
 }
 
-/** `client`/`feedbackIndex`/`responders` are paired: all set or all unset. */
+/**
+ * `getResponseCount` — contract semantics: zero `clientAddress` → every client; `feedbackIndex` 0 →
+ * every feedback of that client; empty `responders` → every responder.
+ */
 export async function getResponseCount(
   client: Client,
   args: Args & {
     agentId: bigint;
-    client?: Address;
+    clientAddress?: Address;
     feedbackIndex?: bigint;
     responders?: ReadonlyArray<Address>;
   },
 ): Promise<bigint> {
-  return withContractRevert(
-    readContract(client, {
-      abi: reputationRegistryAbi,
-      address: registry(client, args),
-      functionName: "getResponseCount",
-      args: [
-        args.agentId,
-        args.client ?? "0x0000000000000000000000000000000000000000",
-        args.feedbackIndex ?? 0n,
-        args.responders ? [...args.responders] : [],
-      ],
-    }),
+  return read(
+    client,
+    registry(client, "reputation", args),
+    reputationRegistryAbi,
+    "getResponseCount",
+    [
+      args.agentId,
+      args.clientAddress ?? zeroAddress,
+      args.feedbackIndex ?? 0n,
+      [...(args.responders ?? [])],
+    ],
   );
 }
 
+/** `getVersion` of the reputation registry. */
 export async function getReputationVersion(client: Client, args: Args = {}): Promise<string> {
-  return withContractRevert(
-    readContract(client, {
-      abi: reputationRegistryAbi,
-      address: registry(client, args),
-      functionName: "getVersion",
-    }),
+  return read(
+    client,
+    registry(client, "reputation", args),
+    reputationRegistryAbi,
+    "getVersion",
+    [],
   );
 }
 
+/** `giveFeedback` write — `value` is a pre-validated `FeedbackValue`. */
 export async function giveFeedback(
   client: Client,
   args: Args & {
@@ -197,7 +220,7 @@ export async function giveFeedback(
   return withContractRevert(
     writeContract(client, {
       abi: reputationRegistryAbi,
-      address: registry(client, args),
+      address: registry(client, "reputation", args),
       functionName: "giveFeedback",
       args: [
         args.agentId,
@@ -215,6 +238,7 @@ export async function giveFeedback(
   );
 }
 
+/** `revokeFeedback` write; reverts `AlreadyRevoked` on a second call. */
 export async function revokeFeedback(
   client: Client,
   args: Args & { agentId: bigint; feedbackIndex: bigint },
@@ -222,7 +246,7 @@ export async function revokeFeedback(
   return withContractRevert(
     writeContract(client, {
       abi: reputationRegistryAbi,
-      address: registry(client, args),
+      address: registry(client, "reputation", args),
       functionName: "revokeFeedback",
       args: [args.agentId, args.feedbackIndex],
       account: sender(client, args.account),
@@ -231,12 +255,12 @@ export async function revokeFeedback(
   );
 }
 
-/** `responseUri` must be non-empty (`EmptyResponseUri`). */
+/** `appendResponse` write; `ClientGuardError` `EmptyResponseUri` for an empty URI. */
 export async function appendResponse(
   client: Client,
   args: Args & {
     agentId: bigint;
-    client: Address;
+    clientAddress: Address;
     feedbackIndex: bigint;
     responseUri: string;
     responseHash?: Hex;
@@ -248,11 +272,11 @@ export async function appendResponse(
   return withContractRevert(
     writeContract(client, {
       abi: reputationRegistryAbi,
-      address: registry(client, args),
+      address: registry(client, "reputation", args),
       functionName: "appendResponse",
       args: [
         args.agentId,
-        args.client,
+        args.clientAddress,
         args.feedbackIndex,
         args.responseUri,
         args.responseHash ?? zeroHash,

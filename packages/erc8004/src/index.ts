@@ -15,6 +15,7 @@ export {
   ClientGuardError,
   ContractRevertError,
   JsonDocumentError,
+  InvalidResponseError,
   MissingEventError,
   ResolveError,
   UnsupportedChainError,
@@ -72,8 +73,8 @@ export type { AgentWalletMessage } from "./identity/index.ts";
 export { createFeedbackFile, feedbackFileToJson, parseFeedbackFile } from "./reputation/index.ts";
 export type { FeedbackFile } from "./reputation/index.ts";
 export type { Agent } from "./identity/index.ts";
-export type { Feedback, FeedbackEntry } from "./reputation/index.ts";
-export type { ValidationStatus } from "./validation/index.ts";
+export type { Feedback, FeedbackEntry, ReputationSummary } from "./reputation/index.ts";
+export type { ValidationStatus, ValidationSummary } from "./validation/index.ts";
 export { erc8004PublicActions, erc8004WalletActions } from "./actions.ts";
 export type { Erc8004ActionsOptions } from "./actions.ts";
 export {

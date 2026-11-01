@@ -38,7 +38,7 @@ const agent = await publicClient.erc8004GetAgent({ agentId: 1n });
 const registration = await resolveAgentUri(agent.agentUri);
 const summary = await publicClient.erc8004GetReputationSummary({
   agentId: 1n,
-  clients: ["0x..."],
+  clientAddresses: ["0x..."],
 });
 
 const wallet = createWalletClient({

@@ -7,7 +7,8 @@ use_small_heuristics = "Default"
 # Import organization (stable features only)
 reorder_imports = true
 reorder_modules = true
-group_imports   = "StdExternalCrate" # nightly-only; enforce manually: std → external → crate
+# group_imports = "StdExternalCrate" is nightly-only on rustfmt 1.99.
+# Enforce manually: std → external → crate.
 
 # Code style
 newline_style            = "Auto"

@@ -30,7 +30,7 @@ const publicClient = createPublicClient({ chain: base, transport: http() }).exte
 const agent = await publicClient.erc8004GetAgent({ agentId: 1n });
 const summary = await publicClient.erc8004GetReputationSummary({
   agentId: 1n,
-  clients: ["0x…"],
+  clientAddresses: ["0x…"],
 });
 const status = await publicClient.erc8004GetValidationStatus({ requestHash });
 

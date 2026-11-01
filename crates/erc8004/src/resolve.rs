@@ -12,8 +12,8 @@ use alloy::primitives::U256;
 
 use crate::JsonDocumentError;
 use crate::agent_registry::AgentRegistry;
+use crate::registration::agent_uri::AgentUriError;
 use crate::registration::agent_uri::{AgentUri, DEFAULT_IPFS_GATEWAY};
-use crate::registration::data_uri::DataUriError;
 use crate::registration::domain::well_known_registration_url;
 use crate::registration::file::RegistrationFile;
 
@@ -36,9 +36,9 @@ pub enum ResolveError {
     /// The body is not valid JSON text.
     #[error("agentURI body is not valid JSON")]
     InvalidJson,
-    /// The data URI failed to decode.
+    /// The URI itself was malformed (bad gateway string, bad data URI).
     #[error(transparent)]
-    DataUri(#[from] DataUriError),
+    AgentUri(#[from] AgentUriError),
     /// The JSON document failed to parse.
     #[error(transparent)]
     Document(#[from] JsonDocumentError),
@@ -57,7 +57,7 @@ impl ResolveError {
             Self::HttpStatus(_) => "HttpStatus",
             Self::TooLarge => "TooLarge",
             Self::InvalidJson => "InvalidJson",
-            Self::DataUri(e) => e.code(),
+            Self::AgentUri(e) => e.code(),
             Self::Document(e) => e.code(),
             Self::Transport(_) => "Transport",
         }
@@ -102,6 +102,7 @@ impl Resolver {
     pub fn new(options: ResolverOptions) -> Result<Self, ResolveError> {
         let client = reqwest::Client::builder()
             .timeout(options.timeout)
+            .https_only(true)
             .build()
             .map_err(|e| ResolveError::Transport(Box::new(e)))?;
         Ok(Self { client, options })
@@ -144,20 +145,12 @@ impl Resolver {
     /// [`ResolveError`] variants for scheme, HTTP, size, JSON, or document failures;
     /// data-URI and document errors propagate via `#[from]`.
     pub async fn resolve_agent_uri(&self, uri: &str) -> Result<RegistrationFile, ResolveError> {
-        match AgentUri::classify(uri, &self.options.ipfs_gateway).map_err(|e| match e {
-            crate::registration::agent_uri::AgentUriError::Data(d) => ResolveError::DataUri(d),
-            crate::registration::agent_uri::AgentUriError::InvalidGateway(_) => {
-                ResolveError::UnsupportedScheme
-            }
-        })? {
+        match AgentUri::classify(uri, &self.options.ipfs_gateway)? {
             AgentUri::NotSet => Err(ResolveError::NotSet),
             AgentUri::UnsupportedScheme => Err(ResolveError::UnsupportedScheme),
-            AgentUri::Data { bytes } => {
-                let text = std::str::from_utf8(&bytes).map_err(|_| ResolveError::InvalidJson)?;
-                serde_json::from_str::<serde_json::Value>(text)
-                    .map_err(|_| ResolveError::InvalidJson)
-                    .and_then(|v| RegistrationFile::from_value(&v).map_err(Into::into))
-            }
+            AgentUri::Data { bytes } => serde_json::from_slice::<serde_json::Value>(&bytes)
+                .map_err(|_| ResolveError::InvalidJson)
+                .and_then(|v| RegistrationFile::from_value(&v).map_err(Into::into)),
             AgentUri::Ipfs { url } | AgentUri::Https { url } => {
                 let body = self.fetch(&url).await?;
                 serde_json::from_slice::<serde_json::Value>(&body)
@@ -168,29 +161,25 @@ impl Resolver {
     }
 
     /// Fetches `{endpoint}/.well-known/agent-registration.json` and verifies it registers
-    /// `{agent_registry, agent_id}` — `Ok(false)` on every failure mode.
-    ///
-    /// # Errors
-    ///
-    /// Never — transport, parse, and scheme failures all yield `Ok(false)`.
+    /// `{agent_registry, agent_id}` — `false` on every failure mode.
     pub async fn check_endpoint_domain(
         &self,
         endpoint: &str,
         agent_registry: &AgentRegistry,
         agent_id: U256,
-    ) -> Result<bool, ResolveError> {
+    ) -> bool {
         let Some(url) = well_known_registration_url(endpoint) else {
-            return Ok(false);
+            return false;
         };
         let Ok(body) = self.fetch(&url).await else {
-            return Ok(false);
+            return false;
         };
         let Ok(value) = serde_json::from_slice::<serde_json::Value>(&body) else {
-            return Ok(false);
+            return false;
         };
         let Ok(file) = RegistrationFile::from_value(&value) else {
-            return Ok(false);
+            return false;
         };
-        Ok(file.has_registration(agent_registry, agent_id))
+        file.has_registration(agent_registry, agent_id)
     }
 }

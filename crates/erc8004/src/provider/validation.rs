@@ -225,10 +225,7 @@ impl<'a, P: Provider> Validation<'a, P> {
                 requestHash: request_hash,
             })
             .await?;
-        Ok(TxOutcome {
-            tx_hash: receipt.transaction_hash,
-            value: (),
-        })
+        Ok(TxOutcome::new(&receipt, ()))
     }
 
     /// `validationResponse` — `response` must be `0..=100`.
@@ -253,9 +250,6 @@ impl<'a, P: Provider> Validation<'a, P> {
                 tag: response.tag.clone(),
             })
             .await?;
-        Ok(TxOutcome {
-            tx_hash: receipt.transaction_hash,
-            value: (),
-        })
+        Ok(TxOutcome::new(&receipt, ()))
     }
 }

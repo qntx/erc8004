@@ -151,6 +151,19 @@ export type ClientGuardErrorCode =
   | "ReservedMetadataKey"
   | "EmptyResponseUri";
 
+/**
+ * An on-chain response failed SDK-side validation (e.g. a mismatched parallel-array length or an
+ * out-of-bounds value).
+ */
+export class InvalidResponseError extends Erc8004Error {
+  override name = "InvalidResponseError";
+  override readonly code = "InvalidResponse";
+
+  constructor(message: string) {
+    super("InvalidResponse", message);
+  }
+}
+
 /** A pre-flight guard tripped before any RPC call. */
 export class ClientGuardError extends Erc8004Error {
   override name = "ClientGuardError";
@@ -177,7 +190,8 @@ export type ResolveErrorCode =
   | "UnsupportedScheme"
   | "HttpStatus"
   | "TooLarge"
-  | "InvalidJson";
+  | "InvalidJson"
+  | "Transport";
 
 /** AgentURI resolution failure. */
 export class ResolveError extends Erc8004Error {
@@ -185,8 +199,12 @@ export class ResolveError extends Erc8004Error {
   override readonly code: ResolveErrorCode;
   readonly status: number | undefined;
 
-  constructor(code: ResolveErrorCode, message: string, options?: { status?: number }) {
-    super(code, message);
+  constructor(
+    code: ResolveErrorCode,
+    message: string,
+    options?: { status?: number; cause?: unknown },
+  ) {
+    super(code, message, { cause: options?.cause });
     this.code = code;
     this.status = options?.status;
   }

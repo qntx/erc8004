@@ -36,6 +36,15 @@ pub struct TxOutcome<T> {
     pub value: T,
 }
 
+impl<T> TxOutcome<T> {
+    pub(crate) const fn new(receipt: &TransactionReceipt, value: T) -> Self {
+        Self {
+            tx_hash: receipt.transaction_hash,
+            value,
+        }
+    }
+}
+
 /// On-chain ERC-8004 access over any alloy `Provider`.
 #[derive(Debug, Clone, Copy)]
 pub struct Erc8004<P> {

@@ -6,6 +6,7 @@ export {
   Erc8004Error,
   EventDecodeError,
   FeedbackValueError,
+  InvalidResponseError,
   JsonDocumentError,
   UnsupportedChainError,
 } from "./errors.ts";

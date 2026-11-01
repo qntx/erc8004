@@ -7,4 +7,4 @@ export {
   requestValidation,
   respondToValidation,
 } from "./actions.ts";
-export type { ValidationStatus } from "./actions.ts";
+export type { ValidationStatus, ValidationSummary } from "./actions.ts";
