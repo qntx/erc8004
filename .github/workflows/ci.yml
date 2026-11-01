@@ -9,10 +9,61 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   ci:
+    uses: qntx/workflows/.github/workflows/ci-bun.yml@v2
+    permissions:
+      contents: read
+    # bun run lint → vp check + taplo + check-version + gen --check + parity
+    # bun run build → vp run -r build
+    # bun run test → vp run -r test + repo-level scripts/*.test.ts
+
+  rust:
     uses: qntx/workflows/.github/workflows/ci-rust.yml@v2
     permissions:
       contents: read
     with:
-      submodules: true
+      # rust-version omitted: rust-toolchain.toml pins the toolchain.
+      deny: true
+      doc: true
+      package-check: true
+      packages: erc8004
+
+  cross:
+    uses: qntx/workflows/.github/workflows/ci-rust-cross.yml@v2
+    permissions:
+      contents: read
+    with:
+      targets: wasm32-unknown-unknown
+      packages: erc8004
+      forbid-deps: tokio
+
+  rust-minimal:
+    uses: qntx/workflows/.github/workflows/ci-rust.yml@v2
+    permissions:
+      contents: read
+    with:
+      packages: erc8004
+      features: --no-default-features
+
+  # Cross-language anvil end-to-end: vendored registries + TS and Rust suites.
+  e2e:
+    name: e2e (anvil)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: foundry-rs/foundry-toolchain@dba66c27052e63476d886f22216e119ba7e615bf # v1.9.2
+        with:
+          version: v1.8.6
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      - run: bun install --frozen-lockfile
+      - run: bun run abi --check
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - run: e2e/run.sh

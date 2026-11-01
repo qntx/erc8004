@@ -1,0 +1,69 @@
+---
+title: Rust
+description: erc8004 — features, provider client and resolver.
+---
+
+```toml
+[dependencies]
+erc8004 = "0.5"
+alloy   = { version = "2.5", features = ["providers", "provider-http"] }
+tokio   = { version = "1", features = ["macros", "rt-multi-thread"] }
+```
+
+## Features
+
+| Feature    | Effect                                                                        |
+| ---------- | ----------------------------------------------------------------------------- |
+| `provider` | generic `Erc8004` on-chain client (alloy providers + network + rpc-types-eth) |
+| `fetch`    | `Resolver` agentURI fetcher (reqwest, rustls)                                 |
+| `default`  | `provider` + `fetch`                                                          |
+
+`--no-default-features` is the pure sans-IO core and compiles for
+`wasm32-unknown-unknown` with no `tokio`/`reqwest`/`getrandom` in the tree.
+
+## On-chain client
+
+```rust,no_run
+use alloy::{primitives::U256, providers::ProviderBuilder, transports::http::reqwest::Url};
+use erc8004::{Erc8004, NewFeedback, deployments};
+
+let url: Url = "https://mainnet.base.org".parse()?;
+let provider = ProviderBuilder::new().connect_http(url);
+let erc = Erc8004::new(provider, deployments::BASE);
+
+let agent = erc.identity().get_agent(U256::from(1u64)).await?;
+let feedback = NewFeedback::new(agent.agent_id, value).tag1("quality");
+let outcome = erc.reputation().give_feedback(&feedback).await?;
+println!("feedback #{} in {}", outcome.value, outcome.tx_hash);
+```
+
+`Erc8004::identity()/reputation()/validation()` return borrowed handles mirroring
+the TypeScript actions one-to-one. Writes return `TxOutcome` (`tx_hash` plus
+the parsed value — `register_agent` yields `U256`, `give_feedback` the new
+feedback index). RPC errors with revert data become
+`ProviderError::Revert(RevertReason)`; receipt failures become
+`TransactionFailed`; the same pre-RPC client guards as TypeScript throw the
+same codes.
+
+## Resolution
+
+```rust,no_run
+use erc8004::{Resolver, ResolverOptions};
+
+let resolver = Resolver::new(ResolverOptions::default())?;
+let file = resolver.resolve_agent_uri("ipfs://Qm…").await?;
+let ok = resolver
+    .check_endpoint_domain("https://agent.example", &registry, agent_id)
+    .await?;
+```
+
+`ResolverOptions` defaults to the shared IPFS gateway, a 1 MiB body cap
+(enforced while streaming) and a 10 s timeout. `ResolveError` codes match the
+TypeScript `ResolveError`, plus `Transport` for fetch-level failures.
+
+## Examples
+
+`cargo run -p erc8004 --example query_agent` reads an agent over `RPC_URL` and
+resolves its registration file; `registration_file` builds/serializes/data-URI
+packs a file offline; `give_feedback` sends a signed feedback transaction using
+`PRIVATE_KEY`.

@@ -1,0 +1,194 @@
+[
+  {
+    "id": "core.agent-registry",
+    "ts": {
+      "module": "packages/erc8004/src/core/agent-registry.ts",
+      "tests": ["packages/erc8004/tests/vectors/agent-registry.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/agent_registry.rs",
+      "tests": ["crates/erc8004/tests/vectors.rs"]
+    },
+    "vectors": ["vectors/core/agent-registry.json"]
+  },
+  {
+    "id": "core.feedback-value",
+    "ts": {
+      "module": "packages/erc8004/src/core/feedback-value.ts",
+      "tests": ["packages/erc8004/tests/vectors/feedback-value.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/feedback_value.rs",
+      "tests": ["crates/erc8004/tests/vectors.rs"]
+    },
+    "vectors": ["vectors/core/feedback-value.json"]
+  },
+  {
+    "id": "core.revert",
+    "ts": {
+      "module": "packages/erc8004/src/core/revert.ts",
+      "tests": ["packages/erc8004/tests/vectors/revert.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/revert.rs",
+      "tests": ["crates/erc8004/tests/vectors.rs"]
+    },
+    "vectors": ["vectors/core/revert.json"]
+  },
+  {
+    "id": "registration.file",
+    "ts": {
+      "module": "packages/erc8004/src/registration/file.ts",
+      "tests": ["packages/erc8004/tests/vectors/registration-file.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/registration/file.rs",
+      "tests": ["crates/erc8004/tests/vectors.rs"]
+    },
+    "vectors": ["vectors/registration/file.json"]
+  },
+  {
+    "id": "registration.conformance",
+    "ts": {
+      "module": "packages/erc8004/src/registration/conformance.ts",
+      "tests": ["packages/erc8004/tests/vectors/conformance.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/registration/conformance.rs",
+      "tests": ["crates/erc8004/tests/vectors.rs"]
+    },
+    "vectors": ["vectors/registration/conformance.json"]
+  },
+  {
+    "id": "registration.data-uri",
+    "ts": {
+      "module": "packages/erc8004/src/registration/data-uri.ts",
+      "tests": ["packages/erc8004/tests/vectors/data-uri.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/registration/data_uri.rs",
+      "tests": ["crates/erc8004/tests/vectors.rs"]
+    },
+    "vectors": ["vectors/registration/data-uri.json"]
+  },
+  {
+    "id": "registration.agent-uri",
+    "ts": {
+      "module": "packages/erc8004/src/registration/agent-uri.ts",
+      "tests": ["packages/erc8004/tests/vectors/agent-uri.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/registration/agent_uri.rs",
+      "tests": ["crates/erc8004/tests/vectors.rs"]
+    },
+    "vectors": ["vectors/registration/agent-uri.json"]
+  },
+  {
+    "id": "registration.domain-verification",
+    "ts": {
+      "module": "packages/erc8004/src/registration/domain.ts",
+      "tests": ["packages/erc8004/tests/vectors/domain-verification.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/registration/domain.rs",
+      "tests": ["crates/erc8004/tests/vectors.rs"]
+    },
+    "vectors": ["vectors/registration/domain-verification.json"]
+  },
+  {
+    "id": "reputation.feedback-file",
+    "ts": {
+      "module": "packages/erc8004/src/reputation/feedback-file.ts",
+      "tests": ["packages/erc8004/tests/vectors/feedback-file.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/feedback.rs",
+      "tests": ["crates/erc8004/tests/vectors.rs"]
+    },
+    "vectors": ["vectors/reputation/feedback-file.json"]
+  },
+  {
+    "id": "identity.agent-wallet",
+    "ts": {
+      "module": "packages/erc8004/src/identity/agent-wallet.ts",
+      "tests": ["packages/erc8004/tests/vectors/agent-wallet.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/wallet.rs",
+      "tests": ["crates/erc8004/tests/vectors.rs"]
+    },
+    "vectors": ["vectors/identity/agent-wallet.json"]
+  },
+  {
+    "id": "events.decode",
+    "ts": {
+      "module": "packages/erc8004/src/events/index.ts",
+      "tests": ["packages/erc8004/tests/vectors/events.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/events.rs",
+      "tests": ["crates/erc8004/tests/vectors.rs"]
+    },
+    "vectors": ["vectors/events/decode.json"]
+  },
+  {
+    "id": "deployments.table",
+    "ts": {
+      "module": "packages/erc8004/src/deployments/data.ts",
+      "tests": ["packages/erc8004/tests/deployments.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/deployments/mod.rs",
+      "tests": ["crates/erc8004/tests/vectors.rs"]
+    },
+    "vectors": ["data/deployments.json"]
+  },
+  {
+    "id": "identity.actions",
+    "ts": {
+      "module": "packages/erc8004/src/identity/actions.ts",
+      "tests": ["packages/erc8004/tests/e2e/core.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/provider/identity.rs",
+      "tests": ["crates/erc8004/tests/e2e.rs"]
+    },
+    "vectors": []
+  },
+  {
+    "id": "reputation.actions",
+    "ts": {
+      "module": "packages/erc8004/src/reputation/actions.ts",
+      "tests": ["packages/erc8004/tests/e2e/core.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/provider/reputation.rs",
+      "tests": ["crates/erc8004/tests/e2e.rs"]
+    },
+    "vectors": []
+  },
+  {
+    "id": "validation.actions",
+    "ts": {
+      "module": "packages/erc8004/src/validation/actions.ts",
+      "tests": ["packages/erc8004/tests/e2e/core.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/provider/validation.rs",
+      "tests": ["crates/erc8004/tests/e2e.rs"]
+    },
+    "vectors": []
+  },
+  {
+    "id": "registration.resolve",
+    "ts": {
+      "module": "packages/erc8004/src/registration/resolve.ts",
+      "tests": ["packages/erc8004/tests/resolve.test.ts"]
+    },
+    "rust": {
+      "module": "crates/erc8004/src/resolve.rs",
+      "tests": ["crates/erc8004/tests/e2e.rs"]
+    },
+    "vectors": []
+  }
+]

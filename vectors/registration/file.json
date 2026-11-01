@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "capability": "registration.file",
+  "source": { "kind": "spec", "spec": "AGENTS.md" },
+  "cases": [
+    { "input": {}, "output": {} },
+    {
+      "input": {
+        "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+        "name": "Agent",
+        "description": "Does things",
+        "image": "https://example.com/a.png",
+        "services": [
+          { "name": "web", "endpoint": "https://example.com", "version": "1.0", "skills": ["search"], "domains": ["example.com"], "custom": { "k": true } }
+        ],
+        "x402Support": true,
+        "active": false,
+        "registrations": [
+          { "agentId": 5, "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432", "extraField": "kept" }
+        ],
+        "supportedTrust": ["reputation", "crypto-economic"],
+        "supportedTrusts": ["misspelled-but-preserved"],
+        "x402support": false
+      },
+      "output": {
+        "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+        "name": "Agent",
+        "description": "Does things",
+        "image": "https://example.com/a.png",
+        "services": [
+          { "name": "web", "endpoint": "https://example.com", "version": "1.0", "skills": ["search"], "domains": ["example.com"], "custom": { "k": true } }
+        ],
+        "x402Support": true,
+        "active": false,
+        "registrations": [
+          { "agentId": 5, "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432", "extraField": "kept" }
+        ],
+        "supportedTrust": ["reputation", "crypto-economic"],
+        "supportedTrusts": ["misspelled-but-preserved"],
+        "x402support": false
+      }
+    },
+    { "input": { "name": "A", "unicode": "emoji 🚀 ünïcodé 你好" }, "output": { "name": "A", "unicode": "emoji 🚀 ünïcodé 你好" } },
+    { "input": { "registrations": [{ "agentId": "5", "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" }] }, "output": { "registrations": [{ "agentId": 5, "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" }] } },
+    { "input": { "registrations": [{ "agentId": "0", "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" }] }, "output": { "registrations": [{ "agentId": 0, "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" }] } },
+    { "input": { "registrations": [{ "agentId": "9007199254740992", "agentRegistry": "r" }] }, "output": { "registrations": [{ "agentId": "9007199254740992", "agentRegistry": "r" }] } },
+    { "input": { "registrations": [{ "agentId": "115792089237316195423570985008687907853269984665640564039457584007913129639935", "agentRegistry": "r" }] }, "output": { "registrations": [{ "agentId": "115792089237316195423570985008687907853269984665640564039457584007913129639935", "agentRegistry": "r" }] } },
+    { "input": { "registrations": [{ "agentId": 9007199254740991, "agentRegistry": "r" }] }, "output": { "registrations": [{ "agentId": 9007199254740991, "agentRegistry": "r" }] } },
+    { "inputText": "{\"registrations\":[{\"agentId\":1e3,\"agentRegistry\":\"r\"}]}", "output": { "registrations": [{ "agentId": 1000, "agentRegistry": "r" }] } },
+    { "inputText": "{\"registrations\":[{\"agentId\":1.0,\"agentRegistry\":\"r\"}]}", "output": { "registrations": [{ "agentId": 1, "agentRegistry": "r" }] } },
+    { "input": null, "error": "NotAnObject" },
+    { "input": [], "error": "NotAnObject" },
+    { "input": "x", "error": "NotAnObject" },
+    { "input": 5, "error": "NotAnObject" },
+    { "input": true, "error": "NotAnObject" },
+    { "input": { "type": 5 }, "error": "InvalidField", "field": "type" },
+    { "input": { "name": {} }, "error": "InvalidField", "field": "name" },
+    { "input": { "description": [] }, "error": "InvalidField", "field": "description" },
+    { "input": { "image": true }, "error": "InvalidField", "field": "image" },
+    { "input": { "services": "x" }, "error": "InvalidField", "field": "services" },
+    { "input": { "services": [5] }, "error": "InvalidField", "field": "services[0]" },
+    { "input": { "services": [{}] }, "error": "InvalidField", "field": "services[0].name" },
+    { "input": { "services": [{ "name": "w" }] }, "error": "InvalidField", "field": "services[0].endpoint" },
+    { "input": { "services": [{ "name": 1, "endpoint": "e" }] }, "error": "InvalidField", "field": "services[0].name" },
+    { "input": { "services": [{ "name": "w", "endpoint": 5 }] }, "error": "InvalidField", "field": "services[0].endpoint" },
+    { "input": { "services": [{ "name": "w", "endpoint": "e", "version": 1 }] }, "error": "InvalidField", "field": "services[0].version" },
+    { "input": { "services": [{ "name": "w", "endpoint": "e", "skills": "a" }] }, "error": "InvalidField", "field": "services[0].skills" },
+    { "input": { "services": [{ "name": "w", "endpoint": "e", "skills": ["a", 1] }] }, "error": "InvalidField", "field": "services[0].skills" },
+    { "input": { "services": [{ "name": "w", "endpoint": "e", "domains": "d" }] }, "error": "InvalidField", "field": "services[0].domains" },
+    { "input": { "x402Support": "yes" }, "error": "InvalidField", "field": "x402Support" },
+    { "input": { "active": 1 }, "error": "InvalidField", "field": "active" },
+    { "input": { "registrations": "x" }, "error": "InvalidField", "field": "registrations" },
+    { "input": { "registrations": [5] }, "error": "InvalidField", "field": "registrations[0]" },
+    { "input": { "registrations": [{}] }, "error": "InvalidField", "field": "registrations[0].agentId" },
+    { "input": { "registrations": [{ "agentId": 5 }] }, "error": "InvalidField", "field": "registrations[0].agentRegistry" },
+    { "input": { "registrations": [{ "agentId": 5, "agentRegistry": 3 }] }, "error": "InvalidField", "field": "registrations[0].agentRegistry" },
+    { "input": { "registrations": [{ "agentId": -1, "agentRegistry": "r" }] }, "error": "InvalidField", "field": "registrations[0].agentId" },
+    { "input": { "registrations": [{ "agentId": 1.5, "agentRegistry": "r" }] }, "error": "InvalidField", "field": "registrations[0].agentId" },
+    { "input": { "registrations": [{ "agentId": 9007199254740992, "agentRegistry": "r" }] }, "error": "InvalidField", "field": "registrations[0].agentId" },
+    { "input": { "registrations": [{ "agentId": "01", "agentRegistry": "r" }] }, "error": "InvalidField", "field": "registrations[0].agentId" },
+    { "input": { "registrations": [{ "agentId": "", "agentRegistry": "r" }] }, "error": "InvalidField", "field": "registrations[0].agentId" },
+    { "input": { "registrations": [{ "agentId": "-1", "agentRegistry": "r" }] }, "error": "InvalidField", "field": "registrations[0].agentId" },
+    { "input": { "registrations": [{ "agentId": "1e3", "agentRegistry": "r" }] }, "error": "InvalidField", "field": "registrations[0].agentId" },
+    { "input": { "registrations": [{ "agentId": true, "agentRegistry": "r" }] }, "error": "InvalidField", "field": "registrations[0].agentId" },
+    { "input": { "supportedTrust": "x" }, "error": "InvalidField", "field": "supportedTrust" },
+    { "input": { "supportedTrust": [1] }, "error": "InvalidField", "field": "supportedTrust" },
+    { "input": { "services": [{ "name": "a", "endpoint": "b", "skills": [] }], "supportedTrust": [] }, "output": { "services": [{ "name": "a", "endpoint": "b", "skills": [] }], "supportedTrust": [] } }
+  ]
+}

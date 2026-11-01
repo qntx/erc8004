@@ -1,5 +1,5 @@
 # cargo-deny configuration for the erc8004 workspace.
-# Run: `cargo deny check` (also wired into CI / Justfile).
+# Run: `cargo deny check` (also wired into CI).
 
 [graph]
 all-features = true
@@ -8,29 +8,12 @@ all-features = true
 feature-depth = 1
 
 [advisories]
-ignore = []
+# `alloy` transitively depends on unmaintained `paste` (RUSTSEC-2024-0436).
+ignore = [{ id = "RUSTSEC-2024-0436", reason = "transitive via alloy-primitives (unmaintained paste); drop when alloy replaces it" }, { id = "RUSTSEC-2026-0387", reason = "crypto-bigint 0.5 timing; dev-dep chain only (alloy signer-local → elliptic-curve 0.13 pins 0.5.x), no upgrade path until alloy moves on" }]
 
 [licenses]
 confidence-threshold = 0.8
-allow                = [
-    "MIT",
-    "MIT-0",
-    "Apache-2.0",
-    "Apache-2.0 WITH LLVM-exception",
-    "BSD-2-Clause",
-    "BSD-3-Clause",
-    "BSD-1-Clause",
-    "ISC",
-    "CC0-1.0",
-    "Unlicense",
-    "Zlib",
-    "MPL-2.0",
-    "Unicode-3.0",
-    "Unicode-DFS-2016",
-    "BSL-1.0",
-    "OpenSSL",
-    "CDLA-Permissive-2.0",
-]
+allow                = ["MIT", "MIT-0", "0BSD", "Apache-2.0", "Apache-2.0 WITH LLVM-exception", "BSD-2-Clause", "BSD-3-Clause", "BSD-1-Clause", "ISC", "CC0-1.0", "Unlicense", "Zlib", "MPL-2.0", "Unicode-3.0", "Unicode-DFS-2016", "BSL-1.0", "OpenSSL", "CDLA-Permissive-2.0"]
 
 [licenses.private]
 ignore = false

@@ -1,0 +1,8 @@
+exclude = ["**/node_modules/**", "**/target/**", "dist/**", "3rdparty/**", "docs/**", "e2e/dependencies/**"]
+
+[formatting]
+align_entries = true
+indent_string = "  "
+array_trailing_comma = true
+array_auto_expand = false
+column_width = 200

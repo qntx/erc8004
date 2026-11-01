@@ -2,36 +2,46 @@
 * text=auto eol=lf
 
 # Source code files
-*.rs    text diff=rust
-*.toml  text diff=toml
-
-# Scripts and configuration files
-*.sh    text eol=lf
-*.bat   text eol=crlf
-*.cmd   text eol=crlf
+*.ts    text diff=typescript
+*.tsx   text diff=typescript
+*.js    text diff=javascript
+*.jsx   text diff=javascript
+*.mjs   text
+*.cjs   text
+*.css   text
+*.html  text
 *.json  text
 *.yaml  text
-*.xml   text
+*.yml   text
+*.toml  text diff=toml
+*.rs    text diff=rust
 *.md    text
 *.txt   text
 
-# Visual Studio files
-*.sln        text eol=crlf
-*.vcxproj    text eol=crlf
-*.vcxproj.filters text eol=crlf
+# Scripts
+*.sh    text eol=lf
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
 
 # Binary files
 *.png   binary
 *.jpg   binary
+*.jpeg  binary
 *.gif   binary
 *.ico   binary
+*.webp  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
 *.zip   binary
-*.dll   binary
-*.exe   binary
-*.lib   binary
 *.pdf   binary
+*.wasm  binary
+
+# Generated / lockfiles
+bun.lock linguist-generated=true
 
 # Special handling
 *.json  merge=union
 *.yaml  merge=union
-*.xml   merge=union
+*.yml   merge=union

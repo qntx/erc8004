@@ -23,5 +23,5 @@
 
   // First line must be a top-level heading: disabled. README typically opens
   // with badges or centered logo blocks before the `# Title` heading.
-  "MD041": false
+  "MD041": false,
 }

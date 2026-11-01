@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "capability": "registration.agent-uri",
+  "source": { "kind": "spec", "spec": "AGENTS.md" },
+  "cases": [
+    { "input": "", "output": { "kind": "NotSet" } },
+    { "input": "data:application/json;base64,e30=", "output": { "kind": "Data", "bytes": "0x7b7d" } },
+    { "input": "data:text/plain;base64,aGk=", "error": "UnsupportedMediaType" },
+    { "input": "data:", "error": "NotDataUri" },
+    { "input": "ipfs://QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG", "output": { "kind": "Ipfs", "url": "https://ipfs.io/ipfs/QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG" } },
+    { "input": "ipfs://bafybeigdyr/foo/bar.json?x=1#f", "output": { "kind": "Ipfs", "url": "https://ipfs.io/ipfs/bafybeigdyr/foo/bar.json?x=1#f" } },
+    { "input": "IPFS://QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG", "output": { "kind": "Ipfs", "url": "https://ipfs.io/ipfs/QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG" } },
+    { "input": "ipfs://QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG", "gateway": "https://gateway.pinata.cloud/ipfs/", "output": { "kind": "Ipfs", "url": "https://gateway.pinata.cloud/ipfs/QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG" } },
+    { "input": "ipfs://QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG", "gateway": "https://gw.example/ipfs", "error": "InvalidGateway" },
+    { "input": "ipfs://", "output": { "kind": "UnsupportedScheme" } },
+    { "input": "https://example.com/agent.json", "output": { "kind": "Https", "url": "https://example.com/agent.json" } },
+    { "input": "HTTPS://example.com/agent.json", "output": { "kind": "Https", "url": "HTTPS://example.com/agent.json" } },
+    { "input": "http://example.com/agent.json", "output": { "kind": "UnsupportedScheme" } },
+    { "input": "ipfs", "output": { "kind": "UnsupportedScheme" } },
+    { "input": "ftp://example.com/x", "output": { "kind": "UnsupportedScheme" } },
+    { "input": "//example.com/x", "output": { "kind": "UnsupportedScheme" } },
+    { "input": "example.com/x", "output": { "kind": "UnsupportedScheme" } },
+    { "input": "data:application/json;base64,eyJ9x", "error": "InvalidBase64" }
+  ]
+}

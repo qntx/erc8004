@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "capability": "registration.data-uri",
+  "source": { "kind": "spec", "spec": "AGENTS.md" },
+  "cases": [
+    { "op": "decode", "input": "data:application/json;base64,e30=", "output": "0x7b7d" },
+    { "op": "decode", "input": "data:APPLICATION/JSON;base64,e30=", "output": "0x7b7d" },
+    { "op": "decode", "input": "DATA:application/json;base64,e30=", "output": "0x7b7d" },
+    { "op": "decode", "input": "data:application/json;charset=utf-8;base64,e30=", "output": "0x7b7d" },
+    { "op": "decode", "input": "data:application/json;charset=UTF-8;foo=1;base64,aGVsbG8=", "output": "0x68656c6c6f" },
+    { "op": "decode", "input": "data:application/json;base64,QQ==", "output": "0x41" },
+    { "op": "decode", "input": "data:application/json;base64,", "output": "0x" },
+    { "op": "decode", "input": "data:text/plain;base64,aGk=", "error": "UnsupportedMediaType" },
+    { "op": "decode", "input": "data:application/json5;base64,e30=", "error": "UnsupportedMediaType" },
+    { "op": "decode", "input": "data:;base64,e30=", "error": "UnsupportedMediaType" },
+    { "op": "decode", "input": "data:application/json,e30=", "error": "NotBase64" },
+    { "op": "decode", "input": "data:application/json;base64;charset=utf-8,e30=", "error": "NotBase64" },
+    { "op": "decode", "input": "foo", "error": "NotDataUri" },
+    { "op": "decode", "input": "datax:application/json;base64,e30=", "error": "NotDataUri" },
+    { "op": "decode", "input": "data:", "error": "NotDataUri" },
+    { "op": "decode", "input": "data:application/json", "error": "NotDataUri" },
+    { "op": "decode", "input": "data:application/json;base64,eyJ*", "error": "InvalidBase64" },
+    { "op": "decode", "input": "data:application/json;base64,ey J9", "error": "InvalidBase64" },
+    { "op": "decode", "input": "data:application/json;base64,eyJ9x", "error": "InvalidBase64" },
+    { "op": "decode", "input": "data:application/json;base64,e30=\n", "error": "InvalidBase64" },
+    { "op": "decode", "input": "data:application/json;base64,eyJ9=AA", "error": "InvalidBase64" },
+    { "op": "encode", "input": "0x7b7d", "output": "data:application/json;base64,e30=" },
+    { "op": "encode", "input": "0x", "output": "data:application/json;base64," },
+    { "op": "encode", "input": "0x68656c6c6f", "output": "data:application/json;base64,aGVsbG8=" },
+    { "op": "encode", "input": "0x41", "output": "data:application/json;base64,QQ==" }
+  ]
+}

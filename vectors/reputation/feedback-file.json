@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "capability": "reputation.feedback-file",
+  "source": { "kind": "spec", "spec": "AGENTS.md" },
+  "cases": [
+    {
+      "input": {
+        "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+        "agentId": 5,
+        "clientAddress": "eip155:1:0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+        "createdAt": "2025-01-01T00:00:00Z",
+        "value": 9970,
+        "valueDecimals": 2,
+        "tag1": "quality",
+        "tag2": "speed",
+        "endpoint": "https://example.com",
+        "mcp": { "tool": "x" },
+        "a2a": {},
+        "oasf": { "skills": [] },
+        "proofOfPayment": { "tx": "0xabc" },
+        "custom": ["kept"]
+      },
+      "output": {
+        "agentRegistry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+        "agentId": 5,
+        "clientAddress": "eip155:1:0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+        "createdAt": "2025-01-01T00:00:00Z",
+        "value": 9970,
+        "valueDecimals": 2,
+        "tag1": "quality",
+        "tag2": "speed",
+        "endpoint": "https://example.com",
+        "mcp": { "tool": "x" },
+        "a2a": {},
+        "oasf": { "skills": [] },
+        "proofOfPayment": { "tx": "0xabc" },
+        "custom": ["kept"]
+      }
+    },
+    {
+      "input": { "agentRegistry": "r", "agentId": "9007199254740993", "clientAddress": "c", "createdAt": "t", "value": "-123456789012345678901234567890", "valueDecimals": 18 },
+      "output": { "agentRegistry": "r", "agentId": "9007199254740993", "clientAddress": "c", "createdAt": "t", "value": "-123456789012345678901234567890", "valueDecimals": 18 }
+    },
+    {
+      "input": { "agentRegistry": "r", "agentId": 0, "clientAddress": "c", "createdAt": "t", "value": "9970", "valueDecimals": 2 },
+      "output": { "agentRegistry": "r", "agentId": 0, "clientAddress": "c", "createdAt": "t", "value": 9970, "valueDecimals": 2 }
+    },
+    {
+      "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": "-0", "valueDecimals": 0 },
+      "output": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 0, "valueDecimals": 0 }
+    },
+    {
+      "inputText": "{\"agentRegistry\":\"r\",\"agentId\":1e3,\"clientAddress\":\"c\",\"createdAt\":\"t\",\"value\":1.0,\"valueDecimals\":0}",
+      "output": { "agentRegistry": "r", "agentId": 1000, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 0 }
+    },
+    { "input": {}, "error": "InvalidField", "field": "agentRegistry" },
+    { "input": { "agentRegistry": "r" }, "error": "InvalidField", "field": "agentId" },
+    { "input": { "agentRegistry": "r", "agentId": 1 }, "error": "InvalidField", "field": "clientAddress" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c" }, "error": "InvalidField", "field": "createdAt" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t" }, "error": "InvalidField", "field": "value" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1 }, "error": "InvalidField", "field": "valueDecimals" },
+    { "input": null, "error": "NotAnObject" },
+    { "input": [], "error": "NotAnObject" },
+    { "input": { "agentRegistry": 5, "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 0 }, "error": "InvalidField", "field": "agentRegistry" },
+    { "input": { "agentRegistry": "r", "agentId": 1.5, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 0 }, "error": "InvalidField", "field": "agentId" },
+    { "input": { "agentRegistry": "r", "agentId": -1, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 0 }, "error": "InvalidField", "field": "agentId" },
+    { "input": { "agentRegistry": "r", "agentId": "01", "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 0 }, "error": "InvalidField", "field": "agentId" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": 5, "createdAt": "t", "value": 1, "valueDecimals": 0 }, "error": "InvalidField", "field": "clientAddress" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": {}, "value": 1, "valueDecimals": 0 }, "error": "InvalidField", "field": "createdAt" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1.5, "valueDecimals": 0 }, "error": "InvalidField", "field": "value" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": "+5", "valueDecimals": 0 }, "error": "InvalidField", "field": "value" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": "007", "valueDecimals": 0 }, "error": "InvalidField", "field": "value" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": "", "valueDecimals": 0 }, "error": "InvalidField", "field": "value" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": "1000000000000000000000000000000000000001", "valueDecimals": 0 }, "error": "InvalidField", "field": "value" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 19 }, "error": "InvalidField", "field": "valueDecimals" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": -1 }, "error": "InvalidField", "field": "valueDecimals" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 1.5 }, "error": "InvalidField", "field": "valueDecimals" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": "2" }, "error": "InvalidField", "field": "valueDecimals" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 0, "tag1": 5 }, "error": "InvalidField", "field": "tag1" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 0, "tag2": [] }, "error": "InvalidField", "field": "tag2" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 0, "endpoint": 9 }, "error": "InvalidField", "field": "endpoint" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 0, "mcp": 5 }, "error": "InvalidField", "field": "mcp" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 0, "a2a": [] }, "error": "InvalidField", "field": "a2a" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 0, "oasf": "x" }, "error": "InvalidField", "field": "oasf" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 0, "proofOfPayment": null }, "error": "InvalidField", "field": "proofOfPayment" },
+    {
+      "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 9007199254740991, "valueDecimals": 0 },
+      "output": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 9007199254740991, "valueDecimals": 0 }
+    },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 9007199254740992, "valueDecimals": 0 }, "error": "InvalidField", "field": "value" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": true, "valueDecimals": 0 }, "error": "InvalidField", "field": "value" },
+    { "input": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 0, "x402Support": "preserved" }, "output": { "agentRegistry": "r", "agentId": 1, "clientAddress": "c", "createdAt": "t", "value": 1, "valueDecimals": 0, "x402Support": "preserved" } }
+  ]
+}

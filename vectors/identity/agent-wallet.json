@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "capability": "identity.agent-wallet",
+  "source": {
+    "kind": "reference",
+    "name": "viem",
+    "version": "2.57.11",
+    "generator": "packages/erc8004/scripts/vectors/agent-wallet.ts"
+  },
+  "cases": [
+    {
+      "op": "hash",
+      "input": {
+        "chainId": 1,
+        "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+        "message": {
+          "agentId": "1",
+          "newWallet": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+          "owner": "0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359",
+          "deadline": "1735689600"
+        }
+      },
+      "output": "0x0f58def1e5440f6fdc1281eb40fb2105dbffd872519b3f7b9168ef8f8e44b873"
+    },
+    {
+      "op": "hash",
+      "input": {
+        "chainId": 84532,
+        "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+        "message": {
+          "agentId": "42",
+          "newWallet": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+          "owner": "0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359",
+          "deadline": "1735689600"
+        }
+      },
+      "output": "0x73e0ae05943627f8a2ada45f0a9fddcf1d88d5cc5dd251e9d03fe1ec4410e523"
+    },
+    {
+      "op": "hash",
+      "input": {
+        "chainId": 1,
+        "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+        "message": {
+          "agentId": "0",
+          "newWallet": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+          "owner": "0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359",
+          "deadline": "0"
+        }
+      },
+      "output": "0xa51894e3446641d65ad835738087f2226a86405f63f03e971caec1586f47c13b"
+    },
+    {
+      "op": "hash",
+      "input": {
+        "chainId": 1,
+        "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+        "message": {
+          "agentId": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+          "newWallet": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+          "owner": "0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359",
+          "deadline": "18446744073709551615"
+        }
+      },
+      "output": "0x02e8cadfd5816ddf7c2645d9fcb8a66bda13f19d31b942a60dbb6e1b591a5fe0"
+    },
+    {
+      "op": "hash",
+      "input": {
+        "chainId": 1,
+        "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+        "message": {
+          "agentId": "7",
+          "newWallet": "0x0000000000000000000000000000000000000000",
+          "owner": "0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359",
+          "deadline": "999999"
+        }
+      },
+      "output": "0xca06e8b833bcba70f55a55c282f06dbe857c58d6c632702f1579cf00ccb476a7"
+    },
+    {
+      "op": "deadline",
+      "input": {
+        "deadline": "100",
+        "now": "100"
+      },
+      "output": null
+    },
+    {
+      "op": "deadline",
+      "input": {
+        "deadline": "100",
+        "now": "99"
+      },
+      "output": null
+    },
+    {
+      "op": "deadline",
+      "input": {
+        "deadline": "100",
+        "now": "101"
+      },
+      "error": "DeadlineExpired"
+    },
+    {
+      "op": "deadline",
+      "input": {
+        "deadline": "400",
+        "now": "100"
+      },
+      "output": null
+    },
+    {
+      "op": "deadline",
+      "input": {
+        "deadline": "402",
+        "now": "101"
+      },
+      "error": "DeadlineTooFar"
+    },
+    {
+      "op": "deadline",
+      "input": {
+        "deadline": "401",
+        "now": "100"
+      },
+      "error": "DeadlineTooFar"
+    },
+    {
+      "op": "deadline",
+      "input": {
+        "deadline": "0",
+        "now": "0"
+      },
+      "output": null
+    },
+    {
+      "op": "deadline",
+      "input": {
+        "deadline": "0",
+        "now": "1"
+      },
+      "error": "DeadlineExpired"
+    },
+    {
+      "op": "deadline",
+      "input": {
+        "deadline": "18446744073709551615",
+        "now": "18446744073709551615"
+      },
+      "output": null
+    }
+  ]
+}
