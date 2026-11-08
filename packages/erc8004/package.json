@@ -95,10 +95,10 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
     "@qntx/tsconfig": "1.0.1",
-    "@types/node": "26.6.5",
+    "@types/node": "26.6.6",
     "publint": "0.3.25",
     "typescript": "7.0.2",
-    "viem": "2.57.11",
+    "viem": "2.57.14",
     "vite-plus": "1.4.0"
   },
   "peerDependencies": {
