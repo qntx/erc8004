@@ -4,7 +4,7 @@
   "source": {
     "kind": "reference",
     "name": "viem",
-    "version": "2.57.11",
+    "version": "2.58.1",
     "generator": "packages/erc8004/scripts/vectors/events.ts"
   },
   "cases": [
